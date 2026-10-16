@@ -11,7 +11,7 @@ noncomputable section
 /- `SU(n)` — 特殊ユニタリ群 -/
 abbrev SU (n : ℕ) := specialUnitaryGroup (Fin n) ℂ
 
-/- `Definition14` -/
+/- `Definition14` 回転群（特殊直交群）-/
 /-- SO(3) := {R ∈ O(3) | det R = 1}, O(3) := {Q ∈ GL(3, ℝ) | Qᵗ = Q⁻¹} --/
 abbrev SO (n : ℕ) := specialOrthogonalGroup (Fin n) ℝ
 
