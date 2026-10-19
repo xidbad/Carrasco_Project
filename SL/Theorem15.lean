@@ -270,8 +270,8 @@ lemma exists_conjMatrix_of_col2_eq_e2 {R : Matrix (Fin 3) (Fin 3) ℝ}
       rw [hw2, hz2]; ring
     · ext i j
       fin_cases i <;> fin_cases j <;>
-        simp [h02, h12, h22, e20, e21, h11, h01] <;>
-        linarith [hw2, hz2, hwz]
+      simp [h02, h12, h22, e20, e21, h11, h01] <;>
+      linarith [hw2, hz2, hwz]
 
 /-- Every element of `SO(3)` is the rotation attached to a unit quaternion. -/
 theorem exists_conjMatrix {R : Matrix (Fin 3) (Fin 3) ℝ}
