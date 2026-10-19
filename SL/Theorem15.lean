@@ -27,11 +27,9 @@ def toVec (x : ℍ[ℝ]) : Fin 3 → ℝ := ![x.imI, x.imJ, x.imK]
 lemma ofVec_toVec {x : ℍ[ℝ]} (hx : x.re = 0) : ofVec (toVec x) = x := by
   apply Quaternion.ext <;> simp [ofVec, hx]
 
-
 -- q による共役作用は純虚四元数を保つ
 lemma conj_re (q x : ℍ[ℝ]) (hx : x.re = 0) : (q * x * star q).re = 0 := by
   simp [hx]; ring
-
 
 -- 純虚四元数に対する共役作用 `x ↦ q * x * star q` に対応する `ℝ³` 上の線形写像
 -- ofVec v ∈ ℍ[ℝ] に共役作用させて, 再び toVec で ℝ³ に戻す　→ 線形写像であること
@@ -43,12 +41,10 @@ def conjLin (q : ℍ[ℝ]) : (Fin 3 → ℝ) →ₗ[ℝ] (Fin 3 → ℝ) where
     fin_cases i <;> simp [this, mul_add, add_mul, toVec]
   map_smul' c v := by  -- スカラー倍を保つ
     have : ofVec (c • v) = c • ofVec v := by apply Quaternion.ext <;> simp [ofVec]
-    funext i
-    fin_cases i <;> simp [this, toVec]
+    funext i; fin_cases i <;> simp [this, toVec]
 
 @[simp] lemma conjLin_apply (q : ℍ[ℝ]) (v : Fin 3 → ℝ) :
     conjLin q v = toVec (q * ofVec v * star q) := rfl
-
 
 -- `i, j, k` を基底とするq による共役作用の行列表示
 /- q = q₀ + q₁i + q₂j + q₃k, v = (v₁, v₂, v₃) とすると,
@@ -59,13 +55,11 @@ conjLin q v = 0 + {(q₀² + q₁² - q₂² - q₃²)v₁ + 2(q₁q₂ - q₀q�
 conjLin q v = conjMatrix q (v₁ v₂ v₃)ᵀ  -/
 def conjMatrix (q : ℍ[ℝ]) : Matrix (Fin 3) (Fin 3) ℝ := LinearMap.toMatrix' (conjLin q)
 
-
 -- 行列conjMatrix q は、q による共役作用を実装する
 -- conjMatrix q v = conjLin q v
 lemma conjMatrix_mulVec (q : ℍ[ℝ]) (v : Fin 3 → ℝ) :
     conjMatrix q *ᵥ v = toVec (q * ofVec v * star q) :=
   LinearMap.toMatrix'_mulVec (conjLin q) v
-
 
 -- 純虚四元数に対する共役作用の座標表示
 lemma conjMatrix_mulVec_toVec (q x : ℍ[ℝ]) (hx : x.re = 0) :
@@ -73,8 +67,7 @@ lemma conjMatrix_mulVec_toVec (q x : ℍ[ℝ]) (hx : x.re = 0) :
   rw [conjMatrix_mulVec, ofVec_toVec hx]
 
 -- conjMatrix の具体
-lemma conjMatrix_eq (q : ℍ[ℝ]) :
-    conjMatrix q =
+lemma conjMatrix_eq (q : ℍ[ℝ]) : conjMatrix q =
       !![q.re ^ 2 + q.imI ^ 2 - q.imJ ^ 2 - q.imK ^ 2,
           2 * (q.imI * q.imJ - q.re * q.imK),
           2 * (q.imI * q.imK + q.re * q.imJ);
@@ -89,8 +82,7 @@ lemma conjMatrix_eq (q : ℍ[ℝ]) :
 
 -- conjMatrix の各成分を引き出せるように
 @[simp] lemma conjMatrix_00 (q : ℍ[ℝ]) :
-    conjMatrix q 0 0 = q.re ^ 2 + q.imI ^ 2 - q.imJ ^ 2 - q.imK ^ 2 := by
-  rw [conjMatrix_eq]; rfl
+    conjMatrix q 0 0 = q.re ^ 2 + q.imI ^ 2 - q.imJ ^ 2 - q.imK ^ 2 := by rw [conjMatrix_eq]; rfl
 @[simp] lemma conjMatrix_01 (q : ℍ[ℝ]) :
     conjMatrix q 0 1 = 2 * (q.imI * q.imJ - q.re * q.imK) := by rw [conjMatrix_eq]; rfl
 @[simp] lemma conjMatrix_02 (q : ℍ[ℝ]) :
@@ -108,71 +100,79 @@ lemma conjMatrix_eq (q : ℍ[ℝ]) :
 @[simp] lemma conjMatrix_22 (q : ℍ[ℝ]) :
     conjMatrix q 2 2 = q.re ^ 2 - q.imI ^ 2 - q.imJ ^ 2 + q.imK ^ 2 := by rw [conjMatrix_eq]; rfl
 
+-- conjMatrix の準同型性
+-- 積の構造を保つ
 lemma conjMatrix_mul (p q : ℍ[ℝ]) : conjMatrix (p * q) = conjMatrix p * conjMatrix q := by
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [conjMatrix_eq, Matrix.mul_apply, Fin.sum_univ_three] <;> ring
+  ext i j; fin_cases i <;> fin_cases j <;>
+  simp [conjMatrix_eq, Matrix.mul_apply, Fin.sum_univ_three] <;> ring
 
+-- 単位元
 @[simp] lemma conjMatrix_one : conjMatrix (1 : ℍ[ℝ]) = 1 := by
   ext i j
   fin_cases i <;> fin_cases j <;> simp
 
+-- 逆元
 @[simp] lemma conjMatrix_neg (q : ℍ[ℝ]) : conjMatrix (-q) = conjMatrix q := by
   ext i j
   fin_cases i <;> fin_cases j <;> simp
 
-/-- The coordinate form of `‖q‖ = 1`. -/
+/-- IsUnitQ q とは q ∈ ℍ[ℝ] の大きさが 1 であるということ(単位四元数) i.e. ‖q‖ = 1 -/
 def IsUnitQ (q : ℍ[ℝ]) : Prop := q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 = 1
 
+-- IsUnitQ q ↔ ‖q‖ = 1
 lemma isUnitQ_iff_normSq (q : ℍ[ℝ]) : IsUnitQ q ↔ Quaternion.normSq q = 1 := by
   rw [IsUnitQ, Quaternion.normSq_def']
 
+-- 単位四元数同士の積もまた単位四元数
 lemma IsUnitQ.mul {p q : ℍ[ℝ]} (hp : IsUnitQ p) (hq : IsUnitQ q) : IsUnitQ (p * q) := by
-  rw [isUnitQ_iff_normSq] at hp hq ⊢
+  rw [isUnitQ_iff_normSq] at hp hq ⊢  -- at ⊢ でgoalにも適用
   rw [map_mul, hp, hq, one_mul]
 
+-- q が単位四元数ならば, conjMatrix q は転置行列との積が単位行列になる i.e. 直交行列 O(3)
 lemma conjMatrix_mul_transpose {q : ℍ[ℝ]} (hq : IsUnitQ q) :
     conjMatrix q * (conjMatrix q)ᵀ = 1 := by
   have h : q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 = 1 := hq
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [conjMatrix_eq, Matrix.mul_apply, Fin.sum_univ_three] <;>
-    first
-      | ring1
-      | linear_combination (q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 + 1) * h
+  ext i j; fin_cases i <;> fin_cases j <;>
+  simp [conjMatrix_eq, Matrix.mul_apply, Fin.sum_univ_three] <;>
+  first       -- 以下のタクティクを上から順に試して、成功したら終了、失敗したら次のタクティクへ
+    | ring1   -- 可換環における等式の場合
+    -- goalを仮定の(不)等式などを使った線形結合でかく
+    | linear_combination (q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 + 1) * h
 
+-- 逆もまた成り立つ
 lemma conjMatrix_transpose_mul {q : ℍ[ℝ]} (hq : IsUnitQ q) :
     (conjMatrix q)ᵀ * conjMatrix q = 1 := by
   have h : q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 = 1 := hq
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [conjMatrix_eq, Matrix.mul_apply, Fin.sum_univ_three] <;>
-    first
-      | ring1
-      | linear_combination (q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 + 1) * h
+  ext i j; fin_cases i <;> fin_cases j <;>
+  simp [conjMatrix_eq, Matrix.mul_apply, Fin.sum_univ_three] <;>
+  first
+    | ring1
+    | linear_combination (q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 + 1) * h
 
+-- q が単位四元数ならば, conjMatrix q の行列式が1
+-- 直交行列の行列式は -1 or 1 → 鏡映を含まない
 lemma conjMatrix_det {q : ℍ[ℝ]} (hq : IsUnitQ q) : (conjMatrix q).det = 1 := by
   have h : q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 = 1 := hq
   simp [conjMatrix_eq, Matrix.det_fin_three]
   linear_combination ((q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2) ^ 2 +
     (q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2) + 1) * h
 
-/-- The matrix of a unit quaternion determines the quaternion up to sign. -/
+
+-- IsUnitQ q → conjMatrix q が単位行列になるのは, q = 1 or q = -1 のときのみ.
 lemma conjMatrix_eq_one_iff {q : ℍ[ℝ]} (hq : IsUnitQ q) :
     conjMatrix q = 1 ↔ q = 1 ∨ q = -1 := by
   have h : q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 = 1 := hq
   constructor
   · intro hM
-    have e00 := congrFun (congrFun hM 0) 0
-    have e11 := congrFun (congrFun hM 1) 1
-    have e22 := congrFun (congrFun hM 2) 2
-    simp at e00 e11 e22
+    have e00 := congrFun (congrFun hM 0) 0  -- conjmatrix q の 0 0 成分
+    have e11 := congrFun (congrFun hM 1) 1  -- conjMatrix q の 1 1 成分
+    have e22 := congrFun (congrFun hM 2) 2  -- conjMatrix q の 2 2 成分
+    simp at e00 e11 e22  -- conjMatrix q の対角成分
     have hb : q.imI = 0 := by nlinarith [sq_nonneg q.imI, sq_nonneg q.imJ, sq_nonneg q.imK]
     have hc : q.imJ = 0 := by nlinarith [sq_nonneg q.imI, sq_nonneg q.imJ, sq_nonneg q.imK]
     have hd : q.imK = 0 := by nlinarith [sq_nonneg q.imI, sq_nonneg q.imJ, sq_nonneg q.imK]
     have ha : q.re = 1 ∨ q.re = -1 := by
-      have hfac : (q.re - 1) * (q.re + 1) = 0 := by
-        rw [hb, hc, hd] at h; nlinarith
+      have hfac : (q.re - 1) * (q.re + 1) = 0 := by rw [hb, hc, hd] at h; nlinarith
       rcases mul_eq_zero.mp hfac with h' | h'
       · exact Or.inl (by linarith)
       · exact Or.inr (by linarith)
@@ -182,14 +182,13 @@ lemma conjMatrix_eq_one_iff {q : ℍ[ℝ]} (hq : IsUnitQ q) :
   · rintro (rfl | rfl) <;> simp
 
 
-/-! ### Surjectivity onto `SO(3)` -/
+/- `SO(3) への全射性` -/
 
-/-- Every unit vector of `ℝ³` is the image of the third basis vector under some rotation
-coming from a unit quaternion. -/
+-- 3次元単位ベクトルが与えられたとき, ある単位四元数が存在して, その回転行列の第3列目が(v0 v1 v2)ᵀ に一致する.
 lemma exists_conjMatrix_col2 {v0 v1 v2 : ℝ} (h : v0 ^ 2 + v1 ^ 2 + v2 ^ 2 = 1) :
     ∃ q : ℍ[ℝ], IsUnitQ q ∧ conjMatrix q 0 2 = v0 ∧ conjMatrix q 1 2 = v1 ∧
       conjMatrix q 2 2 = v2 := by
-  rcases eq_or_ne v2 (-1) with hv2 | hv2
+  rcases eq_or_ne v2 (-1) with hv2 | hv2  -- v2 = -1 → (0, 0, -1) の場合を回避 → 1 + v2 ≠ 0
   · have hv0 : v0 = 0 := by nlinarith [sq_nonneg v0, sq_nonneg v1]
     have hv1 : v1 = 0 := by nlinarith [sq_nonneg v0, sq_nonneg v1]
     exact ⟨⟨0, 1, 0, 0⟩, by simp [IsUnitQ], by simp [hv0], by simp [hv1], by simp [hv2]⟩
@@ -201,8 +200,8 @@ lemma exists_conjMatrix_col2 {v0 v1 v2 : ℝ} (h : v0 ^ 2 + v1 ^ 2 + v2 ^ 2 = 1)
     have hn2 : Real.sqrt (2 * (1 + v2)) ^ 2 = 2 * (1 + v2) := Real.sq_sqrt hpos.le
     have hnpos : 0 < Real.sqrt (2 * (1 + v2)) := Real.sqrt_pos.mpr hpos
     have hne : Real.sqrt (2 * (1 + v2)) ≠ 0 := ne_of_gt hnpos
-    set n := Real.sqrt (2 * (1 + v2)) with hn
-    refine ⟨⟨(1 + v2) / n, -v1 / n, v0 / n, 0⟩, ?_, ?_, ?_, ?_⟩
+    set n := Real.sqrt (2 * (1 + v2)) with hn  -- n = √(2 * (1 + v2))
+    refine ⟨⟨(1 + v2) / n, -v1 / n, v0 / n, 0⟩, ?_, ?_, ?_, ?_⟩  -- q = (1 + v2) / n - (v1 / n)i + (v0 / n)j + 0
     · show ((1 + v2) / n) ^ 2 + (-v1 / n) ^ 2 + (v0 / n) ^ 2 + (0 : ℝ) ^ 2 = 1
       field_simp
       nlinarith [hn2, h]
@@ -219,30 +218,34 @@ lemma exists_conjMatrix_col2 {v0 v1 v2 : ℝ} (h : v0 ^ 2 + v1 ^ 2 + v2 ^ 2 = 1)
       field_simp
       nlinarith [hn2, h]
 
-/-- A rotation matrix fixing the third basis vector comes from a unit quaternion. -/
+
+-- 第3列目を固定する回転行列R ∈ SO(3) はある単位四元数から生成される
+-- R はz軸周りの回転行列
 lemma exists_conjMatrix_of_col2_eq_e2 {R : Matrix (Fin 3) (Fin 3) ℝ}
     (hR : Rᵀ * R = 1) (hdet : R.det = 1)
     (h02 : R 0 2 = 0) (h12 : R 1 2 = 0) (h22 : R 2 2 = 1) :
     ∃ q : ℍ[ℝ], IsUnitQ q ∧ conjMatrix q = R := by
   have e : ∀ i j, (Rᵀ * R) i j = (1 : Matrix (Fin 3) (Fin 3) ℝ) i j := fun i j => by rw [hR]
-  have e20 := e 2 0
-  have e21 := e 2 1
-  have e00 := e 0 0
-  have e11 := e 1 1
+  have e20 := e 2 0  -- Rᵀ * R = 1 から (Rᵀ * R) の任意の成分は単位行列の各成分と等しい = 0
+  have e21 := e 2 1  -- = 0
+  have e00 := e 0 0  -- = 1
+  have e11 := e 1 1  -- = 1
   simp [Matrix.mul_apply, Fin.sum_univ_three, h02, h12, h22] at e20 e21 e00 e11
   have hdet' : R 0 0 * R 1 1 - R 0 1 * R 1 0 = 1 := by
     rw [Matrix.det_fin_three] at hdet
     rw [h02, h12, h22, e20, e21] at hdet
     linarith
+  -- R = (Rᵢⱼ) (0 ≤ i ≤ 2, 0 ≤ j ≤ 2) として, Rᵀ * R = 1 からわかる
+  -- (R 0 0)² + (R 1 0)² = 1 = (R 0 1)² + (R 1 1)² ∧ (R 0 0 * R 1 1 - R 0 1 * R 1 0) = 1
+  -- → (R 1 1 - R 0 0)² + (R 0 1 + R 1 0)² = 0
   have h11 : R 1 1 = R 0 0 := by nlinarith [sq_nonneg (R 1 1 - R 0 0), sq_nonneg (R 0 1 + R 1 0)]
   have h01 : R 0 1 = -R 1 0 := by nlinarith [sq_nonneg (R 1 1 - R 0 0), sq_nonneg (R 0 1 + R 1 0)]
   have hcs : R 0 0 ^ 2 + R 1 0 ^ 2 = 1 := by rw [e20] at e00; linear_combination e00
-  rcases eq_or_ne (R 0 0) (-1) with hc | hc
+  rcases eq_or_ne (R 0 0) (-1) with hc | hc  -- R 0 0 = -1 で場合分け
   · have hs : R 1 0 = 0 := by nlinarith
-    refine ⟨⟨0, 0, 0, 1⟩, by simp [IsUnitQ], ?_⟩
-    ext i j
-    fin_cases i <;> fin_cases j <;>
-      simp [h02, h12, h22, e20, e21, hc, hs, h11, h01]
+    refine ⟨⟨0, 0, 0, 1⟩, by simp [IsUnitQ], ?_⟩  -- q = k
+    ext i j; fin_cases i <;> fin_cases j <;>
+    simp [h02, h12, h22, e20, e21, hc, hs, h11, h01]
   · have hcge : -1 ≤ R 0 0 := by nlinarith [sq_nonneg (R 1 0), sq_nonneg (R 0 0 + 1)]
     have hpos : 0 < (1 + R 0 0) / 2 := by
       rcases hcge.lt_or_eq with h' | h'
