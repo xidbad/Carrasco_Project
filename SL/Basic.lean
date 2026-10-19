@@ -3,7 +3,6 @@ import Mathlib.Algebra.Order.Ring.Star
 import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 import Mathlib.Data.Int.Star
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
-import Mathlib.LinearAlgebra.UnitaryGroup
 import Mathlib.RingTheory.RootsOfUnity.Complex
 
 open MatrixGroups Matrix Complex SpecialLinearGroup
@@ -12,20 +11,24 @@ noncomputable section
 
 -- [位数2の巡回群] --
 
+-- SL(2, ℂ) の単位元
 def I₂ : SL(2, ℂ) := by
   refine ⟨(1 : Matrix (Fin 2) (Fin 2) ℂ), ?_⟩
   simp
 
+-- -I₂ ∈ SL(2, ℂ)
 def minusI₂ : SL(2, ℂ) := by
   refine ⟨(-1 : Matrix (Fin 2) (Fin 2) ℂ), ?_⟩
   simp [det_fin_two]
 
+-- (-I₂)⁻¹ = -I₂
 lemma aux : minusI₂⁻¹ = minusI₂ := by
   have h : minusI₂ * minusI₂ = 1 := by
     simp [minusI₂]
     aesop
   apply inv_eq_iff_mul_eq_one.mpr h
 
+-- {I₂, -I₂} が SL(2, ℂ) の部分群
 def sl_cyclic : Subgroup SL(2, ℂ) where
   carrier := {I₂, minusI₂}                    -- {I₂, -I₂} が SL(2, ℂ) の部分群であること
 
@@ -91,10 +94,10 @@ def cyclic_subgroup : Subgroup SL(2, ℂ) where
 def cyclicSubgroup : Subgroup SL(2, ℂ) :=
   Subgroup.zpowers (M n)  -- M n を生成元とする巡回群, Subgroup.closure {M n}
 
-lemma pow_ne_one (k : ℕ) (hk : 0 < k ∧ k < n) (hlt : 1 < n) :
-    (exp (2 * Real.pi * I / n)) ^ k ≠ 1 := by
-  have hprim : IsPrimitiveRoot (exp (2 * Real.pi * I / n)) n := by
-    refine (isPrimitiveRoot_iff (exp (2 * Real.pi * I/n)) n ?_).mpr ?_
+-- ζ n ^ k ≠ 1 for 0 < k < n
+lemma pow_ne_one (k : ℕ) (hk : 0 < k ∧ k < n) (hlt : 1 < n) : ζ n ^ k ≠ 1 := by
+  have hprim : IsPrimitiveRoot (ζ n) n := by
+    refine (isPrimitiveRoot_iff (ζ n) n ?_).mpr ?_
     · exact Nat.ne_zero_of_lt hlt
     · use 1
       constructor

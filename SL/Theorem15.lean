@@ -1,20 +1,19 @@
 import SL.Common
 import Mathlib.Analysis.Quaternion
-import Mathlib.LinearAlgebra.UnitaryGroup
-import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
-
 
 open Quaternion Matrix
 
 noncomputable section
 
 
-/-- The purely imaginary quaternion with coordinates `v` in the basis `𝑖, 𝑗, 𝑘`. -/
+-- v ∈ ℝ³ に対応する純虚四元数 0 + v 0 i + v 1 j + v 2 k ∈ ℍ[ℝ] を作る
 def ofVec (v : Fin 3 → ℝ) : ℍ[ℝ] := ⟨0, v 0, v 1, v 2⟩
 
-/-- The coordinates of the imaginary part of a quaternion in the basis `𝑖, 𝑗, 𝑘`. -/
+-- x ∈ ℍ[ℝ] の虚部を取り出して, 3次元ベクトルへ変換
 def toVec (x : ℍ[ℝ]) : Fin 3 → ℝ := ![x.imI, x.imJ, x.imK]
 
+-- simp で書き換えられるように
+-- ofVec と toVec が互いに逆変換であること
 @[simp] lemma toVec_zero (x : ℍ[ℝ]) : toVec x 0 = x.imI := rfl
 @[simp] lemma toVec_one (x : ℍ[ℝ]) : toVec x 1 = x.imJ := rfl
 @[simp] lemma toVec_two (x : ℍ[ℝ]) : toVec x 2 = x.imK := rfl
@@ -24,45 +23,56 @@ def toVec (x : ℍ[ℝ]) : Fin 3 → ℝ := ![x.imI, x.imJ, x.imK]
 
 @[simp] lemma ofVec_re (v : Fin 3 → ℝ) : (ofVec v).re = 0 := rfl
 
+-- x ∈ ℍ[ℝ] の実部が0であれば, 成り立つ
 lemma ofVec_toVec {x : ℍ[ℝ]} (hx : x.re = 0) : ofVec (toVec x) = x := by
   apply Quaternion.ext <;> simp [ofVec, hx]
 
-/-- Conjugation by `q` preserves the purely imaginary quaternions. -/
+
+-- q による共役作用は純虚四元数を保つ
 lemma conj_re (q x : ℍ[ℝ]) (hx : x.re = 0) : (q * x * star q).re = 0 := by
   simp [hx]; ring
 
-/-- The `ℝ`-linear endomorphism of `ℝ³` given by the conjugation action `x ↦ q * x * star q`
-on the purely imaginary quaternions. -/
+
+-- 純虚四元数に対する共役作用 `x ↦ q * x * star q` に対応する `ℝ³` 上の線形写像
+-- ofVec v ∈ ℍ[ℝ] に共役作用させて, 再び toVec で ℝ³ に戻す　→ 線形写像であること
 def conjLin (q : ℍ[ℝ]) : (Fin 3 → ℝ) →ₗ[ℝ] (Fin 3 → ℝ) where
   toFun v := toVec (q * ofVec v * star q)
-  map_add' v w := by
+  map_add' v w := by  -- 加法性を保つ
     have : ofVec (v + w) = ofVec v + ofVec w := by apply Quaternion.ext <;> simp [ofVec]
-    funext i
+    funext i  -- 3 つの成分があるため, それぞれ比較
     fin_cases i <;> simp [this, mul_add, add_mul, toVec]
-  map_smul' c v := by
+  map_smul' c v := by  -- スカラー倍を保つ
     have : ofVec (c • v) = c • ofVec v := by apply Quaternion.ext <;> simp [ofVec]
     funext i
-    fin_cases i <;>
-      simp [this, toVec]
+    fin_cases i <;> simp [this, toVec]
 
 @[simp] lemma conjLin_apply (q : ℍ[ℝ]) (v : Fin 3 → ℝ) :
     conjLin q v = toVec (q * ofVec v * star q) := rfl
 
-/-- The matrix of the conjugation action of `q` on the purely imaginary quaternions,
-written in the basis `𝑖, 𝑗, 𝑘`. -/
+
+-- `i, j, k` を基底とするq による共役作用の行列表示
+/- q = q₀ + q₁i + q₂j + q₃k, v = (v₁, v₂, v₃) とすると,
+conjLin q v = 0 + {(q₀² + q₁² - q₂² - q₃²)v₁ + 2(q₁q₂ - q₀q₃)v₂ + 2(q₁q₃ + q₀q₂)v₃}i
+                + {2(q₁q₂ + q₀q₃)v₁ + (q₀² - q₁² + q₂² - q₃²)v₂ + 2(q₂q₃ - q₀q₁)v₃}j
+                + {2(q₁q₃ - q₀q₂)v₁ + 2(q₂q₃ + q₀q₁)v₂ + (q₀² - q₁² - q₂² + q₃²)v₃}k
+
+conjLin q v = conjMatrix q (v₁ v₂ v₃)ᵀ  -/
 def conjMatrix (q : ℍ[ℝ]) : Matrix (Fin 3) (Fin 3) ℝ := LinearMap.toMatrix' (conjLin q)
 
-/-- The matrix `conjMatrix q` really does implement the conjugation action. -/
+
+-- 行列conjMatrix q は、q による共役作用を実装する
+-- conjMatrix q v = conjLin q v
 lemma conjMatrix_mulVec (q : ℍ[ℝ]) (v : Fin 3 → ℝ) :
     conjMatrix q *ᵥ v = toVec (q * ofVec v * star q) :=
   LinearMap.toMatrix'_mulVec (conjLin q) v
 
-/-- The conjugation action written out on a purely imaginary quaternion. -/
+
+-- 純虚四元数に対する共役作用の座標表示
 lemma conjMatrix_mulVec_toVec (q x : ℍ[ℝ]) (hx : x.re = 0) :
     conjMatrix q *ᵥ toVec x = toVec (q * x * star q) := by
   rw [conjMatrix_mulVec, ofVec_toVec hx]
 
-/-- The entries of `conjMatrix q`. -/
+-- conjMatrix の具体
 lemma conjMatrix_eq (q : ℍ[ℝ]) :
     conjMatrix q =
       !![q.re ^ 2 + q.imI ^ 2 - q.imJ ^ 2 - q.imK ^ 2,
@@ -74,11 +84,10 @@ lemma conjMatrix_eq (q : ℍ[ℝ]) :
          2 * (q.imI * q.imK - q.re * q.imJ),
           2 * (q.imJ * q.imK + q.re * q.imI),
           q.re ^ 2 - q.imI ^ 2 - q.imJ ^ 2 + q.imK ^ 2] := by
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [conjMatrix, LinearMap.toMatrix'_apply, conjLin, ofVec, toVec] <;>
-    ring
+  ext i j; fin_cases i <;> fin_cases j <;>
+  simp [conjMatrix, LinearMap.toMatrix'_apply, conjLin, ofVec, toVec] <;> ring
 
+-- conjMatrix の各成分を引き出せるように
 @[simp] lemma conjMatrix_00 (q : ℍ[ℝ]) :
     conjMatrix q 0 0 = q.re ^ 2 + q.imI ^ 2 - q.imJ ^ 2 - q.imK ^ 2 := by
   rw [conjMatrix_eq]; rfl
@@ -1034,6 +1043,6 @@ theorem prop16 (U : Matrix.specialUnitaryGroup (Fin 2) ℂ) (hU : orderOf U = 2)
     exact hne (Subtype.ext h)
   exact eq_neg_one_of_det_one_of_sq_eq_one _ hdet hsq' hne'
 
-
-
 end
+
+#min_imports

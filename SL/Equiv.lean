@@ -1,10 +1,8 @@
 import SL.Common
-import Mathlib.Algebra.Quaternion
 import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
-import Mathlib.LinearAlgebra.UnitaryGroup
 
 
 open MatrixGroups Matrix Complex SpecialLinearGroup Quaternion
@@ -222,9 +220,7 @@ def norm (q : ℍ[ℝ]) : ℝ := Real.sqrt (q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q
 notation "‖"q"‖" => norm q
 
 lemma norm_eq (q : ℍ[ℝ]) : ‖q‖ = Real.sqrt (q * star q).re := by
-  rw [norm]
-  congr 1
-  simp; ring
+  rw [norm]; congr 1; simp; ring
 
 /- q⁻¹ = star q / ‖q‖² -/
 lemma inv_eq (q : ℍ[ℝ]) : q⁻¹ = (normSq q)⁻¹ • star q :=
@@ -302,7 +298,6 @@ lemma SU2_left_inv_S₃ (M : SU 2) : S₃_to_SU2' (SU2_to_S₃' M) = M := by
 lemma SU2_right_inv_S₃ (x : S₃) : SU2_to_S₃' (S₃_to_SU2' x) = x := by
   ext i; fin_cases i <;> simp [SU2_to_S₃', S₃_to_SU2', S₃_to_SU2, SU2_to_S₃]
 
-
 def SU2_equiv_S₃ : SU 2 ≃ S₃ where
   toFun := SU2_to_S₃'
   invFun := S₃_to_SU2'
@@ -329,6 +324,7 @@ def SU2_to_U' (M : SU 2) : U := ⟨SU2_to_U M.val, SU2_mem_U M⟩
 /- `U ↦ SU 2` -/
 def U_to_SU2 (q : ℍ[ℝ]) : Matrix (Fin 2) (Fin 2) ℂ :=
   !![⟨q.re, q.imI⟩, ⟨q.imJ, q.imK⟩; ⟨-q.imJ, q.imK⟩, ⟨q.re, -q.imI⟩]
+
 
 lemma U_mem_SU2 (q : U) : U_to_SU2 q.val ∈ SU 2 := by
   constructor <;> simp [U_to_SU2]

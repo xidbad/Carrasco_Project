@@ -1,8 +1,6 @@
 import Mathlib.Algebra.Quaternion
-import Mathlib.Algebra.Star.Unitary
 import Mathlib.Data.Complex.Basic
 import Mathlib.LinearAlgebra.UnitaryGroup
-import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
 
 open Quaternion Matrix Complex
 
@@ -19,3 +17,5 @@ abbrev SO (n : ℕ) := specialOrthogonalGroup (Fin n) ℝ
 abbrev U : Submonoid ℍ[ℝ] := unitary ℍ[ℝ]
 
 end
+
+#min_imports
