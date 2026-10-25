@@ -676,7 +676,7 @@ lemma frame_conj_K (F : QuaternionFrame) (θ : ℝ) :
   module
 
 
-/-- 3次元空間における「任意の軸u周りの角度φの回転」は, 対応する単位四元数 q = cos(φ/2) + sin(φ/2)u
+/-- 3次元空間における「任意の軸I周りの角度φの回転」は, 対応する単位四元数 q = cos(φ/2) + sin(φ/2)I
     による共役作用 x ↦ q * x * star q として表せる. 全射性 -/
 theorem frameRotation_represented (F : QuaternionFrame) (φ : ℝ) :
     ∃ q : U, q.val = frameQuaternion F (φ / 2) ∧ r_q q F.I = F.I ∧
@@ -686,8 +686,8 @@ theorem frameRotation_represented (F : QuaternionFrame) (φ : ℝ) :
     have hs : ‖frameQuaternion F (φ / 2)‖ * ‖frameQuaternion F (φ / 2)‖ = 1 := by
       rw [← Quaternion.normSq_eq_norm_mul_self]
       exact frameQuaternion_normSq F (φ / 2)
-    constructor <;> simp only [star_mul_self, self_mul_star]
-    <;> simp only [normSq_eq_norm_mul_self, hs, coe_one]⟩
+    constructor <;>
+    simp only [star_mul_self, self_mul_star, normSq_eq_norm_mul_self, hs, coe_one]⟩
   refine ⟨q, rfl, ?_, ?_, ?_⟩
   · exact frame_conj_I F (φ / 2)
   · simpa only [show 2 * (φ / 2) = φ by ring] using frame_conj_J F (φ / 2)
@@ -699,19 +699,19 @@ lemma conjugation_kernel (q : U) :
     (∀ x : PureImaginary, r_q q x = x.val) ↔ q.val = (1 : ℍ[ℝ]) ∨ q.val = (-1 : ℍ[ℝ]) := by
   constructor
   · intro h
-    let hI : PureImaginary := ⟨(⟨0, 1, 0, 0⟩ : ℍ[ℝ]), by rfl⟩
-    let hJ : PureImaginary := ⟨(⟨0, 0, 1, 0⟩ : ℍ[ℝ]), by rfl⟩
-    have hqI : q.val * ⟨0, 1, 0, 0⟩ * star q.val = ⟨0, 1, 0, 0⟩ := by
-      have := h hI; simp [r_q] at this; exact this
-    have hqJ : q.val * ⟨0, 0, 1, 0⟩ * star q.val = ⟨0, 0, 1, 0⟩ := by
-      have := h hJ; simp [r_q] at this; exact this
+    let qi : PureImaginary := ⟨(⟨0, 1, 0, 0⟩ : ℍ[ℝ]), by rfl⟩  -- i
+    let qj : PureImaginary := ⟨(⟨0, 0, 1, 0⟩ : ℍ[ℝ]), by rfl⟩  -- j
+    have hqI : q.val * ⟨0, 1, 0, 0⟩ * star q.val = ⟨0, 1, 0, 0⟩ := by  -- q * i * star q = i, i ∈ PureImaginary
+      specialize h qi; exact h
+    have hqJ : q.val * ⟨0, 0, 1, 0⟩ * star q.val = ⟨0, 0, 1, 0⟩ := by  -- q * j * star q = j
+      specialize h qj; exact h
     have hq_normSq : Quaternion.normSq q.val = 1 := unitQuaternion_normSq q
-    have h_comm_I : q.val * ⟨0, 1, 0, 0⟩ = ⟨0, 1, 0, 0⟩ * q.val := by
+    have h_comm_I : q.val * ⟨0, 1, 0, 0⟩ = ⟨0, 1, 0, 0⟩ * q.val := by  -- q * i = i * q
       have : q.val * ⟨0, 1, 0, 0⟩ * star q.val * q.val = ⟨0, 1, 0, 0⟩ * q.val := by
         rw [hqI]
-      simp [mul_assoc] at this
+      simp [mul_assoc] at this  -- star q * q = 1
       exact this
-    have h_comm_J : q.val * ⟨0, 0, 1, 0⟩ = ⟨0, 0, 1, 0⟩ * q.val := by
+    have h_comm_J : q.val * ⟨0, 0, 1, 0⟩ = ⟨0, 0, 1, 0⟩ * q.val := by  -- q * j = j * q
       have : q.val * ⟨0, 0, 1, 0⟩ * star q.val * q.val = ⟨0, 0, 1, 0⟩ * q.val := by
         rw [hqJ]
       simp [mul_assoc] at this
@@ -727,9 +727,8 @@ lemma conjugation_kernel (q : U) :
     have h_imI : q.val.imI = 0 := by linarith
     have h_re_sq : q.val.re ^ 2 = 1 := by
       have := unitQuaternion_coordinate_equation q
-      rw [h_imI, h_imJ, h_imK, zero_pow, add_zero, add_zero, add_zero] at this
+      rw [h_imI, h_imJ, h_imK, zero_pow (by norm_num), add_zero, add_zero, add_zero] at this
       exact this
-      norm_num
     have h_re : q.val.re = 1 ∨ q.val.re = -1 := sq_eq_one_iff.mp h_re_sq
     rcases h_re with h_re | h_re
     · left; exact Quaternion.ext_iff.mpr ⟨h_re, h_imI, h_imJ, h_imK⟩
