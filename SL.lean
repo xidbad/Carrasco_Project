@@ -1,5 +1,5 @@
 import SL.Common
-import SL.Basic
+import SL.subgroups
 import SL.Equiv
 import SL.Theorem15
 import SL.cyclicgroup

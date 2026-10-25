@@ -1,4 +1,5 @@
 import SL.Common
+-- import SL.Equiv
 import Mathlib.Analysis.Quaternion
 
 open Quaternion Matrix
@@ -200,7 +201,7 @@ lemma exists_conjMatrix_col2 {v0 v1 v2 : ℝ} (h : v0 ^ 2 + v1 ^ 2 + v2 ^ 2 = 1)
     have hn2 : Real.sqrt (2 * (1 + v2)) ^ 2 = 2 * (1 + v2) := Real.sq_sqrt hpos.le
     have hnpos : 0 < Real.sqrt (2 * (1 + v2)) := Real.sqrt_pos.mpr hpos
     have hne : Real.sqrt (2 * (1 + v2)) ≠ 0 := ne_of_gt hnpos
-    set n := Real.sqrt (2 * (1 + v2)) with hn  -- n = √(2 * (1 + v2))
+    set n := Real.sqrt (2 * (1 + v2)) with hn  -- √(2 * (1 + v2)) ∈ ℝ より n = √(2 * (1 + v2)).
     refine ⟨⟨(1 + v2) / n, -v1 / n, v0 / n, 0⟩, ?_, ?_, ?_, ?_⟩  -- q = (1 + v2) / n - (v1 / n)i + (v0 / n)j + 0
     · show ((1 + v2) / n) ^ 2 + (-v1 / n) ^ 2 + (v0 / n) ^ 2 + (0 : ℝ) ^ 2 = 1
       field_simp
@@ -226,10 +227,10 @@ lemma exists_conjMatrix_of_col2_eq_e2 {R : Matrix (Fin 3) (Fin 3) ℝ}
     (h02 : R 0 2 = 0) (h12 : R 1 2 = 0) (h22 : R 2 2 = 1) :
     ∃ q : ℍ[ℝ], IsUnitQ q ∧ conjMatrix q = R := by
   have e : ∀ i j, (Rᵀ * R) i j = (1 : Matrix (Fin 3) (Fin 3) ℝ) i j := fun i j => by rw [hR]
-  have e20 := e 2 0  -- Rᵀ * R = 1 から (Rᵀ * R) の任意の成分は単位行列の各成分と等しい = 0
-  have e21 := e 2 1  -- = 0
-  have e00 := e 0 0  -- = 1
-  have e11 := e 1 1  -- = 1
+  have e20 := e 2 0  -- Rᵀ * R = 1 から (Rᵀ * R) の任意の成分は単位行列の各成分と等しい → R₂₀ = 0
+  have e21 := e 2 1  -- R₂₁ = 0
+  have e00 := e 0 0  -- R₀₀² + R₁₀² = 1
+  have e11 := e 1 1  -- R₀₁² + R₁₁² = 1
   simp [Matrix.mul_apply, Fin.sum_univ_three, h02, h12, h22] at e20 e21 e00 e11
   have hdet' : R 0 0 * R 1 1 - R 0 1 * R 1 0 = 1 := by
     rw [Matrix.det_fin_three] at hdet
@@ -273,26 +274,27 @@ lemma exists_conjMatrix_of_col2_eq_e2 {R : Matrix (Fin 3) (Fin 3) ℝ}
       simp [h02, h12, h22, e20, e21, h11, h01] <;>
       linarith [hw2, hz2, hwz]
 
-/-- Every element of `SO(3)` is the rotation attached to a unit quaternion. -/
+
+-- 任意の回転行列 R ∈ SO(3) は, ある単位四元数 q ∈ ℍ[ℝ] の作用として表される
 theorem exists_conjMatrix {R : Matrix (Fin 3) (Fin 3) ℝ}
     (hR : Rᵀ * R = 1) (hdet : R.det = 1) :
     ∃ q : ℍ[ℝ], IsUnitQ q ∧ conjMatrix q = R := by
   have e : ∀ i j, (Rᵀ * R) i j = (1 : Matrix (Fin 3) (Fin 3) ℝ) i j := fun i j => by rw [hR]
-  have hcol : R 0 2 ^ 2 + R 1 2 ^ 2 + R 2 2 ^ 2 = 1 := by
+  have hcol : R 0 2 ^ 2 + R 1 2 ^ 2 + R 2 2 ^ 2 = 1 := by  -- 左辺の2 2 成分
     have := e 2 2
     simp [Matrix.mul_apply, Fin.sum_univ_three] at this
     nlinarith [this]
-  obtain ⟨q₁, hq₁, hc0, hc1, hc2⟩ := exists_conjMatrix_col2 hcol
-  set M := conjMatrix q₁ with hMdef
+  obtain ⟨q₁, hq₁, hc0, hc1, hc2⟩ := exists_conjMatrix_col2 hcol  -- ∃ q₁ ∈ U, s.t. conjMatrix q₁ の第3列目が R の第3列目と一致する
+  set M := conjMatrix q₁ with hMdef  -- M := conjMatrix q₁
   have hM : Mᵀ * M = 1 := conjMatrix_transpose_mul hq₁
   have hM' : M * Mᵀ = 1 := conjMatrix_mul_transpose hq₁
-  set N := Mᵀ * R with hNdef
-  have hNN : Nᵀ * N = 1 := by
+  set N := Mᵀ * R with hNdef  -- N := Mᵀ * R
+  have hNN : Nᵀ * N = 1 := by  -- (Mᵀ * R)ᵀ * (Mᵀ * R) = 1
     rw [hNdef, Matrix.transpose_mul, Matrix.transpose_transpose, Matrix.mul_assoc,
       ← Matrix.mul_assoc M Mᵀ R, hM', Matrix.one_mul, hR]
-  have hNdet : N.det = 1 := by
+  have hNdet : N.det = 1 := by  -- det(Mᵀ * R) = det(Mᵀ) * det(R) = det(M) * det(R) = 1 * 1 = 1
     rw [hNdef, Matrix.det_mul, Matrix.det_transpose, hMdef, conjMatrix_det hq₁, hdet, one_mul]
-  have hcolN : ∀ i, N i 2 = (1 : Matrix (Fin 3) (Fin 3) ℝ) i 2 := by
+  have hcolN : ∀ i, N i 2 = (1 : Matrix (Fin 3) (Fin 3) ℝ) i 2 := by  -- N の第3列目は単位行列の第3列目と一致する
     intro i
     have : N i 2 = (Mᵀ * M) i 2 := by
       rw [hNdef]
@@ -305,19 +307,22 @@ theorem exists_conjMatrix {R : Matrix (Fin 3) (Fin 3) ℝ}
   · exact hq₁.mul hq₂
   · rw [conjMatrix_mul, hq₂R, hNdef, ← Matrix.mul_assoc, ← hMdef, hM', Matrix.one_mul]
 
+/- 仮定を R ∈ SO(3) のみに -/
+theorem exists_conjMatrix_SO (R : SO 3) :
+    ∃ q : ℍ[ℝ], IsUnitQ q ∧ conjMatrix q = (R : Matrix (Fin 3) (Fin 3) ℝ) := by
+  have h := R.2
+  rw [mem_specialOrthogonalGroup_iff, mem_orthogonalGroup_iff'] at h
+  exact exists_conjMatrix h.1 h.2
+
 
 /-!
-# `SU(2)` and the unit quaternions
+# `SU(2)` と 単位四元数
 
-We identify the special unitary group `SU(2)` with the group of unit quaternions, by sending
-the matrix `!![a + b i, c + d i; -c + d i, a - b i]` to the quaternion `a + b𝑖 + c𝑗 + d𝑘`.
+SU(2) と U を同一視する. `!![a + b i, c + d i; -c + d i, a - b i] ∈ SU(2) ↦ a + b𝑖 + c𝑗 + d𝑘 ∈ U`.
 -/
 
-
-/-- The entries of a matrix in `SU(2)` satisfy `A 1 1 = conj (A 0 0)` and
-`A 1 0 = - conj (A 0 1)`. -/
-lemma entries {A : Matrix (Fin 2) (Fin 2) ℂ} (hA : A ∈ Matrix.specialUnitaryGroup (Fin 2) ℂ) :
-    A 1 1 = star (A 0 0) ∧ A 1 0 = -star (A 0 1) := by
+/-- A ∈ SU 2, A = !![a, b; -star b, star a] -/
+lemma entries (hA : A ∈ SU 2) : A 1 1 = star (A 0 0) ∧ A 1 0 = -star (A 0 1) := by
   obtain ⟨hU, hdet⟩ := Matrix.mem_specialUnitaryGroup_iff.mp hA
   rw [Matrix.det_fin_two] at hdet
   have hstar : star A * A = 1 := Matrix.mem_unitaryGroup_iff'.mp hU
@@ -350,8 +355,7 @@ def ofQuat (q : ℍ[ℝ]) : Matrix (Fin 2) (Fin 2) ℂ :=
 @[simp] lemma toQuat_ofQuat (q : ℍ[ℝ]) : toQuat (ofQuat q) = q := rfl
 
 lemma toQuat_mul {A B : Matrix (Fin 2) (Fin 2) ℂ}
-    (hB : B ∈ Matrix.specialUnitaryGroup (Fin 2) ℂ) :
-    toQuat (A * B) = toQuat A * toQuat B := by
+    (hB : B ∈ SU 2) : toQuat (A * B) = toQuat A * toQuat B := by
   obtain ⟨hB11, hB10⟩ := entries hB
   apply Quaternion.ext <;>
     simp [toQuat, Matrix.mul_apply, Fin.sum_univ_two, hB11, hB10, Complex.add_re, Complex.add_im,
@@ -359,7 +363,7 @@ lemma toQuat_mul {A B : Matrix (Fin 2) (Fin 2) ℂ}
     ring
 
 lemma normSq_toQuat {A : Matrix (Fin 2) (Fin 2) ℂ}
-    (hA : A ∈ Matrix.specialUnitaryGroup (Fin 2) ℂ) : Quaternion.normSq (toQuat A) = 1 := by
+    (hA : A ∈ SU 2) : Quaternion.normSq (toQuat A) = 1 := by
   obtain ⟨hU, -⟩ := Matrix.mem_specialUnitaryGroup_iff.mp hA
   have h : A * star A = 1 := Matrix.mem_unitaryGroup_iff.mp hU
   have e := congrFun (congrFun h 0) 0
@@ -372,7 +376,7 @@ lemma normSq_toQuat {A : Matrix (Fin 2) (Fin 2) ℂ}
   nlinarith [er]
 
 lemma ofQuat_mem {q : ℍ[ℝ]} (hq : Quaternion.normSq q = 1) :
-    ofQuat q ∈ Matrix.specialUnitaryGroup (Fin 2) ℂ := by
+    ofQuat q ∈ SU 2 := by
   have h : q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 = 1 := by
     rw [Quaternion.normSq_def'] at hq; exact hq
   rw [Matrix.mem_specialUnitaryGroup_iff]
@@ -394,7 +398,7 @@ lemma ofQuat_mem {q : ℍ[ℝ]} (hq : Quaternion.normSq q = 1) :
 
 /-- Only `1` and `-1` are sent to `±1`. -/
 lemma eq_one_of_toQuat_eq_one {A : Matrix (Fin 2) (Fin 2) ℂ}
-    (hA : A ∈ Matrix.specialUnitaryGroup (Fin 2) ℂ) (h : toQuat A = 1) : A = 1 := by
+    (hA : A ∈ SU 2) (h : toQuat A = 1) : A = 1 := by
   obtain ⟨h11, h10⟩ := entries hA
   rw [Quaternion.ext_iff] at h
   simp only [toQuat, Quaternion.re_one, Quaternion.imI_one, Quaternion.imJ_one,
@@ -409,7 +413,7 @@ lemma eq_one_of_toQuat_eq_one {A : Matrix (Fin 2) (Fin 2) ℂ}
     simp [ha, hb, h11, h10]
 
 lemma eq_neg_one_of_toQuat_eq_neg_one {A : Matrix (Fin 2) (Fin 2) ℂ}
-    (hA : A ∈ Matrix.specialUnitaryGroup (Fin 2) ℂ) (h : toQuat A = -1) : A = -1 := by
+    (hA : A ∈ SU 2) (h : toQuat A = -1) : A = -1 := by
   obtain ⟨h11, h10⟩ := entries hA
   rw [Quaternion.ext_iff] at h
   simp only [toQuat, Quaternion.re_neg, Quaternion.imI_neg, Quaternion.imJ_neg,
@@ -447,7 +451,7 @@ lemma eq_neg_one_of_toQuat_eq_neg_one {A : Matrix (Fin 2) (Fin 2) ℂ}
 
 
 /-- `実四元数 ℝ`  -/
-def real := {x : ℍ[ℝ] | x.im = 0}-- ∧ x.imJ = 0 ∧ x.imK = 0} -- {x.im = 0}?
+def real := {x : ℍ[ℝ] | x.im = 0}  -- ∧ x.imJ = 0 ∧ x.imK = 0} -- {x.im = 0}?
 
 
 /-- `純虚四元数`, ℝ³ とみなせる` -/
@@ -936,7 +940,7 @@ lemma fSU_minusI : fSU minusI = minusone := by
   show toQuat (-1 : Matrix (Fin 2) (Fin 2) ℂ) = -1
   apply Quaternion.ext <;> simp [toQuat]
 
-/-- π = h ∘ f⁻¹ : SU 2 → U → SO3, f = U_to_SU2 -/
+/-- π = h ∘ f⁻¹ : SU 2 → U → SO3, f = ofQuat -/
 theorem theorem_15 : ∃ π : SU 2 →* SO 3, Function.Surjective π ∧ π.ker = plusminusI := by
   refine ⟨hMat.comp fSU, hMat_surjective.comp fSU_surjective, ?_⟩
   ext A
@@ -1026,7 +1030,7 @@ theorem eq_neg_one_of_det_one_of_sq_eq_one
 
 
 /-- U ∈ SU(2), order U = 2 ならば U = -I₂ -/
-theorem prop16 (U : Matrix.specialUnitaryGroup (Fin 2) ℂ) (hU : orderOf U = 2) :
+theorem prop16 (U : SU 2) (hU : orderOf U = 2) :
     (U : Matrix (Fin 2) (Fin 2) ℂ) = -1 := by
   have hsq : U ^ 2 = 1 := by
     have h := pow_orderOf_eq_one U
@@ -1038,7 +1042,7 @@ theorem prop16 (U : Matrix.specialUnitaryGroup (Fin 2) ℂ) (hU : orderOf U = 2)
   have hdet : (U : Matrix (Fin 2) (Fin 2) ℂ).det = 1 :=
     (Matrix.mem_specialUnitaryGroup_iff.mp U.2).2
   have hsq' : (U : Matrix (Fin 2) (Fin 2) ℂ) * (U : Matrix (Fin 2) (Fin 2) ℂ) = 1 := by
-    have : ((U ^ 2 : Matrix.specialUnitaryGroup (Fin 2) ℂ) : Matrix (Fin 2) (Fin 2) ℂ) = 1 := by
+    have : ((U ^ 2 : SU 2) : Matrix (Fin 2) (Fin 2) ℂ) = 1 := by
       rw [hsq]; rfl
     simpa [pow_two] using this
   have hne' : (U : Matrix (Fin 2) (Fin 2) ℂ) ≠ 1 := by

@@ -2,9 +2,11 @@ import Mathlib.Algebra.Quaternion
 import Mathlib.Data.Complex.Basic
 import Mathlib.LinearAlgebra.UnitaryGroup
 
-open Quaternion Matrix Complex
+
+open Quaternion Matrix
 
 noncomputable section
+
 
 /- `SU(n)` — 特殊ユニタリ群 -/
 abbrev SU (n : ℕ) := specialUnitaryGroup (Fin n) ℂ
@@ -15,6 +17,7 @@ abbrev SO (n : ℕ) := specialOrthogonalGroup (Fin n) ℝ
 
 -- 単位四元数 : {q ∈ ℍ[ℝ] | q * star q = 1}  いらない?
 abbrev U : Submonoid ℍ[ℝ] := unitary ℍ[ℝ]
+
 
 end
 
