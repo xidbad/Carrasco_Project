@@ -317,7 +317,6 @@ theorem exists_conjMatrix_SO (R : SO 3) :
 
 /-!
 # `SU(2)` と 単位四元数
-
 SU(2) と U を同一視する. `!![a + b i, c + d i; -c + d i, a - b i] ∈ SU(2) ↦ a + b𝑖 + c𝑗 + d𝑘 ∈ U`.
 -/
 
@@ -326,81 +325,77 @@ lemma entries (hA : A ∈ SU 2) : A 1 1 = star (A 0 0) ∧ A 1 0 = -star (A 0 1)
   obtain ⟨hU, hdet⟩ := Matrix.mem_specialUnitaryGroup_iff.mp hA
   rw [Matrix.det_fin_two] at hdet
   have hstar : star A * A = 1 := Matrix.mem_unitaryGroup_iff'.mp hU
-  have hAB : A * !![A 1 1, -A 0 1; -A 1 0, A 0 0] = 1 := by
+  have hAB : A * !![A 1 1, -A 0 1; -A 1 0, A 0 0] = 1 := by  -- A * A⁻¹ = 1
     ext i j
     fin_cases i <;> fin_cases j <;>
       simp [Matrix.mul_apply, Fin.sum_univ_two] <;>
       first
         | ring1
         | linear_combination hdet
-  have hSB : star A = !![A 1 1, -A 0 1; -A 1 0, A 0 0] := by
+  have hSB : star A = !![A 1 1, -A 0 1; -A 1 0, A 0 0] :=  -- star A = A⁻¹
     calc star A = star A * (A * !![A 1 1, -A 0 1; -A 1 0, A 0 0]) := by rw [hAB, mul_one]
       _ = (star A * A) * !![A 1 1, -A 0 1; -A 1 0, A 0 0] := by rw [Matrix.mul_assoc]
       _ = !![A 1 1, -A 0 1; -A 1 0, A 0 0] := by rw [hstar, Matrix.one_mul]
-  have e00 := congrFun (congrFun hSB 0) 0
-  have e01 := congrFun (congrFun hSB 0) 1
+  have e00 := congrFun (congrFun hSB 0) 0  -- hSB の 0 0 成分
+  have e01 := congrFun (congrFun hSB 0) 1  -- hSB の 0 1 成分
   simp at e00 e01
   refine ⟨e00.symm, ?_⟩
-  have := congrArg star e01
+  have := congrArg star e01  -- e01 の両辺に star を適用
   simpa using this
 
-/-- The quaternion attached to a `2 × 2` complex matrix. -/
+/-- SU 2 ↦ U, SU2_to_U と同じ -/
 def toQuat (A : Matrix (Fin 2) (Fin 2) ℂ) : ℍ[ℝ] :=
   ⟨(A 0 0).re, (A 0 0).im, (A 0 1).re, (A 0 1).im⟩
 
-/-- The matrix in `SU(2)` attached to a quaternion. -/
+/-- U ↦ SU 2, U_to_SU2 と同じ -/
 def ofQuat (q : ℍ[ℝ]) : Matrix (Fin 2) (Fin 2) ℂ :=
   !![⟨q.re, q.imI⟩, ⟨q.imJ, q.imK⟩; ⟨-q.imJ, q.imK⟩, ⟨q.re, -q.imI⟩]
 
 @[simp] lemma toQuat_ofQuat (q : ℍ[ℝ]) : toQuat (ofQuat q) = q := rfl
 
+-- toQuat が準同型, SU2_map_mul_U  と同じ
 lemma toQuat_mul {A B : Matrix (Fin 2) (Fin 2) ℂ}
     (hB : B ∈ SU 2) : toQuat (A * B) = toQuat A * toQuat B := by
   obtain ⟨hB11, hB10⟩ := entries hB
   apply Quaternion.ext <;>
-    simp [toQuat, Matrix.mul_apply, Fin.sum_univ_two, hB11, hB10, Complex.add_re, Complex.add_im,
-      Complex.mul_re, Complex.mul_im] <;>
-    ring
+  simp [toQuat, Matrix.mul_apply, Fin.sum_univ_two, hB11, hB10, Complex.add_re, Complex.add_im,
+    Complex.mul_re, Complex.mul_im] <;> ring
 
+-- A ∈ SU 2 ならば toQuat A のノルムは 1, Equiv-309
 lemma normSq_toQuat {A : Matrix (Fin 2) (Fin 2) ℂ}
     (hA : A ∈ SU 2) : Quaternion.normSq (toQuat A) = 1 := by
   obtain ⟨hU, -⟩ := Matrix.mem_specialUnitaryGroup_iff.mp hA
-  have h : A * star A = 1 := Matrix.mem_unitaryGroup_iff.mp hU
-  have e := congrFun (congrFun h 0) 0
+  have h : A * star A = 1 := Matrix.mem_unitaryGroup_iff.mp hU  -- A ∈ SU 2 → A * star A = 1
+  have e := congrFun (congrFun h 0) 0  -- A * star A の 0 0 成分
   simp [Matrix.mul_apply, Fin.sum_univ_two, Matrix.star_eq_conjTranspose,
     Matrix.conjTranspose_apply] at e
-  have er := congrArg Complex.re e
-  simp [Complex.add_re, Complex.mul_re] at er
+  have er := congrArg Complex.re e  -- e の実部を取り出す
+  simp [Complex.add_re, Complex.mul_re] at er  -- 展開
   rw [Quaternion.normSq_def']
   show (A 0 0).re ^ 2 + (A 0 0).im ^ 2 + (A 0 1).re ^ 2 + (A 0 1).im ^ 2 = 1
   nlinarith [er]
 
-lemma ofQuat_mem {q : ℍ[ℝ]} (hq : Quaternion.normSq q = 1) :
-    ofQuat q ∈ SU 2 := by
+-- q ∈ U ならば ofQuat q ∈ SU 2, Equiv-329
+lemma ofQuat_mem {q : ℍ[ℝ]} (hq : Quaternion.normSq q = 1) : ofQuat q ∈ SU 2 := by
   have h : q.re ^ 2 + q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2 = 1 := by
     rw [Quaternion.normSq_def'] at hq; exact hq
-  rw [Matrix.mem_specialUnitaryGroup_iff]
+  rw [Matrix.mem_specialUnitaryGroup_iff]  -- SU 2 → U(2) ∧ det A = 1
   constructor
-  · rw [Matrix.mem_unitaryGroup_iff]
-    ext i j
-    fin_cases i <;> fin_cases j <;>
-      simp [ofQuat, Matrix.mul_apply, Fin.sum_univ_two, Matrix.star_eq_conjTranspose,
-        Matrix.conjTranspose_apply, Complex.ext_iff] <;>
-      constructor <;>
-      first
-        | ring1
-        | linear_combination h
+  · apply Matrix.mem_unitaryGroup_iff.mpr  -- ∈ U → A * star A = 1
+    simp [ofQuat, ← ext_iff, Fin.forall_fin_two]
+    simp [vecMul, dotProduct, Complex.ext_iff]
+    ring_nf; norm_num; exact h
   · rw [Matrix.det_fin_two]
-    simp [ofQuat, Complex.ext_iff]
+    simp [ofQuat, Complex.ext_iff]  -- 複素数の成分比較
     constructor
     · linear_combination h
     · ring
 
-/-- Only `1` and `-1` are sent to `±1`. -/
+/- toQuat A = 1 になるのは A = 1 のみ  -/
 lemma eq_one_of_toQuat_eq_one {A : Matrix (Fin 2) (Fin 2) ℂ}
     (hA : A ∈ SU 2) (h : toQuat A = 1) : A = 1 := by
   obtain ⟨h11, h10⟩ := entries hA
-  rw [Quaternion.ext_iff] at h
+  rw [Quaternion.ext_iff] at h  -- 四元数の成分比較
   simp only [toQuat, Quaternion.re_one, Quaternion.imI_one, Quaternion.imJ_one,
     Quaternion.imK_one] at h
   obtain ⟨h1, h2, h3, h4⟩ := h
@@ -408,10 +403,9 @@ lemma eq_one_of_toQuat_eq_one {A : Matrix (Fin 2) (Fin 2) ℂ}
     Complex.ext (by rw [h1, Complex.one_re]) (by rw [h2, Complex.one_im])
   have hb : A 0 1 = 0 :=
     Complex.ext (by rw [h3, Complex.zero_re]) (by rw [h4, Complex.zero_im])
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [ha, hb, h11, h10]
+  ext i j; fin_cases i <;> fin_cases j <;> simp [ha, hb, h11, h10]
 
+-- toQuat A = -1 になるのは A = -1 のみ
 lemma eq_neg_one_of_toQuat_eq_neg_one {A : Matrix (Fin 2) (Fin 2) ℂ}
     (hA : A ∈ SU 2) (h : toQuat A = -1) : A = -1 := by
   obtain ⟨h11, h10⟩ := entries hA
@@ -425,16 +419,13 @@ lemma eq_neg_one_of_toQuat_eq_neg_one {A : Matrix (Fin 2) (Fin 2) ℂ}
       (by rw [h2, Complex.neg_im, Complex.one_im, neg_zero])
   have hb : A 0 1 = 0 :=
     Complex.ext (by rw [h3, Complex.zero_re]) (by rw [h4, Complex.zero_im])
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [ha, hb, h11, h10]
+  ext i j; fin_cases i <;> fin_cases j <;> simp [ha, hb, h11, h10]
 
 
 /- `Theorem15`
     π : SU 2 → SO 3, ker π = {-I, I} となる全射準同型写像が存在する.
     ⟹ SU 2 ⧸ ker π ≃* SO 3
-    U ≃* SU 2 より, h : U → SO 3, ker h = {-1, 1} を満たす全射準同型があれば, π = h ∘ f⁻¹ (f = U_to_SU 2)
--/
+    U ≃* SU 2 より, h : U → SO 3, ker h = {-1, 1} を満たす全射準同型があれば, π = h ∘ f⁻¹ (f = U_to_SU 2) -/
 
 /-  q = a + bi + cj + dk ∈ U → a² + (b² + c² + d²) = 1 = cos²θ + sin²θ
     a = cosθ, √(b² + c² + d²) = sinθ なる θ ∈ [0, π] がただ一つ定まる.
@@ -453,32 +444,27 @@ lemma eq_neg_one_of_toQuat_eq_neg_one {A : Matrix (Fin 2) (Fin 2) ℂ}
 /-- `実四元数 ℝ`  -/
 def real := {x : ℍ[ℝ] | x.im = 0}  -- ∧ x.imJ = 0 ∧ x.imK = 0} -- {x.im = 0}?
 
-
 /-- `純虚四元数`, ℝ³ とみなせる` -/
 def PureImaginary := {x : ℍ[ℝ] | x.re = 0}
-
 
 variable (q : U) (x : PureImaginary)
 
 /-- U の ℝ³ への作用 -/
-def r_q (q : U) (x : ℍ[ℝ]) : ℍ[ℝ] := (q : ℍ[ℝ]) * x * star (q : ℍ[ℝ])
+def r_q (q : ℍ[ℝ]) (x : ℍ[ℝ]) : ℍ[ℝ] := (q : ℍ[ℝ]) * x * (star q : ℍ[ℝ])
 
 /-- h(q) = r_q(x) と定義 -/
-def h (q : U) : ℍ[ℝ] → ℍ[ℝ] := fun x => r_q q x
+def h (q : ℍ[ℝ]) : ℍ[ℝ] → ℍ[ℝ] := fun x => r_q q x
 
-
-/-- r_q : 純虚四元数を保つ -/
+/-- r_q  は純虚四元数を保つ -/
 lemma r_q_pureim (q : U) (x : PureImaginary) : r_q q x ∈ PureImaginary := by
   have h : x.val.re = 0 := x.prop
   simp [r_q, PureImaginary, h]; ring_nf
-
 
 /-- h が準同型写像であること -/
 lemma h_homomor (q p : U) : h (q * p) = h q ∘ h p := by
   funext x
   simp [h, r_q, Function.comp_apply]
   noncomm_ring
-
 
 /-- 長さを変えない isometry -/
 lemma isometry (q : U) (x : PureImaginary) : ‖r_q q x‖ = ‖x.val‖ := by
@@ -490,19 +476,15 @@ lemma isometry (q : U) (x : PureImaginary) : ‖r_q q x‖ = ‖x.val‖ := by
     rw [r_q, map_mul, map_mul, hqSq, one_mul, normSq_star, hqSq, mul_one]
   nlinarith [norm_nonneg (r_q q x), norm_nonneg x.val]
 
-
 /- 虚部の大きさ -/
 def imagNorm (q : ℍ[ℝ]) : ℝ :=
   Real.sqrt (q.imI ^ 2 + q.imJ ^ 2 + q.imK ^ 2)
 
-
 /-- q = a + (bi + cj + dk) ∈ U の偏角, θ = arccos(a) ∈ [0, π], ‖a‖ ≤ 1 -/
 def quaternionAngle (q : U) : ℝ := Real.arccos q.val.re
 
-
 /-- (0 でない) q ∈ U の虚部の正規化, 回転軸 -/
 def quaternionAxis (q : U) : ℍ[ℝ] := (imagNorm q)⁻¹ • q.val.im
-
 
 /-- q ∈ U, normSq = q * star q -/
 lemma unitQuaternion_normSq (q : U) : Quaternion.normSq q.val = 1 := by
@@ -525,10 +507,10 @@ lemma quaternionAngle_mem (q : U) : quaternionAngle q ∈ Set.Icc (0 : ℝ) Real
 /-- q = a + bi + cj + dk ∈ U, a = cosθ であること -/
 lemma quaternionAngle_cos (q : U) : Real.cos (quaternionAngle q) = q.val.re := by
   rw [quaternionAngle]
-  apply Real.cos_arccos
+  apply Real.cos_arccos  -- cos (arccos x) = x, x ∈ [-1, 1] を使う
   · have h := unitQuaternion_normSq q
     simp [Quaternion.normSq] at h
-    nlinarith [sq_nonneg (q.val.re + 1)]
+    nlinarith [sq_nonneg (q.val.re + 1)]  -- (a + 1)² = a² + 2a + 1 ≥ 0 ∧ a² ≤ 1 → a ≥ -1
   · have h := unitQuaternion_normSq q
     simp [Quaternion.normSq] at h
     nlinarith [sq_nonneg (q.val.re - 1)]
@@ -537,7 +519,7 @@ lemma quaternionAngle_cos (q : U) : Real.cos (quaternionAngle q) = q.val.re := b
 /-- q = a + bi + cj + dk ∈ U, sinθ = √(b² + c² + d²) であること -/
 lemma quaternionAngle_sin (q : U) :
     Real.sin (quaternionAngle q) = imagNorm q.val := by
-  rw [quaternionAngle, imagNorm, Real.sin_arccos]
+  rw [quaternionAngle, imagNorm, Real.sin_arccos]  -- θ = arccos x, cos θ = x
   congr 1
   have h := unitQuaternion_coordinate_equation q
   linarith
@@ -551,8 +533,8 @@ lemma quaternionAngle_unique (q : U) (θ : ℝ) (hθ : θ ∈ Set.Icc (0 : ℝ) 
 
 
 /-- 正規化した回転軸は純虚四元数 -/
-lemma quaternionAxis_re (q : U) : (quaternionAxis q).re = 0 := by
-  simp [quaternionAxis]
+lemma quaternionAxis_re (q : U) : (quaternionAxis q) ∈ PureImaginary := by
+  simp [PureImaginary, quaternionAxis]
 
 
 /-- 虚部が0でないならば, 正規化した回転軸は単位ベクトル -/
@@ -573,7 +555,7 @@ lemma quaternionAxis_normSq (q : U) (h : imagNorm q.val ≠ 0) :
 lemma quaternionAxis_sq (q : U) (h : imagNorm q.val ≠ 0) :
     quaternionAxis q ^ 2 = (-1 : ℍ[ℝ]) := by
   have hNorm := quaternionAxis_normSq q h
-  have hRe := quaternionAxis_re q
+  have hRe : (quaternionAxis q).re = 0 := quaternionAxis_re q
   simp only [sq]
   simp [Quaternion.normSq] at hNorm
   rw [hRe] at hNorm
@@ -635,7 +617,7 @@ lemma frameQuaternion_normSq (F : QuaternionFrame) (θ : ℝ) :
 
 /-- r_q q I = (cosθ + sinθI) * I * (cosθ - sinθI) = I → I は回転軸 -/
 lemma frame_conj_I (F : QuaternionFrame) (θ : ℝ) :
-    frameQuaternion F θ * F.I * star (frameQuaternion F θ) = F.I := by
+    r_q (frameQuaternion F θ) F.I = F.I := by
   have hre : F.I.re = 0 := by
     have h := congrArg (fun x : ℍ[ℝ] => x.re) F.star_I
     simp at h
@@ -645,7 +627,7 @@ lemma frame_conj_I (F : QuaternionFrame) (θ : ℝ) :
     simp [hre] at h
     nlinarith [h]
   have hsc := Real.sin_sq_add_cos_sq θ
-  rw [frameQuaternion_star, frameQuaternion]
+  rw [r_q, frameQuaternion_star, frameQuaternion]
   apply Quaternion.ext <;> simp [hre]
   · ring
   · linear_combination (Real.sin θ ^ 2 * F.I.imI) * hn + F.I.imI * hsc
@@ -655,16 +637,10 @@ lemma frame_conj_I (F : QuaternionFrame) (θ : ℝ) :
 
 /-- r_q(J) = (cos2θ)J + (sin2θ)K → JK平面で2θ回転 -/
 lemma frame_conj_J (F : QuaternionFrame) (θ : ℝ) :
-    frameQuaternion F θ * F.J * star (frameQuaternion F θ) =
-      Real.cos (2 * θ) • F.J + Real.sin (2 * θ) • F.K := by
-  rw [frameQuaternion]
-  simp
-  rw [F.star_I]
+    r_q (frameQuaternion F θ) F.J = Real.cos (2 * θ) • F.J + Real.sin (2 * θ) • F.K := by
+  rw [frameQuaternion, r_q, star_add, star_coe, Quaternion.star_smul, F.star_I]
   simp only [add_mul, mul_add, mul_assoc, smul_mul_assoc, mul_smul_comm]
-  rw [show F.J * (-F.I) = -(F.J * F.I) by rw [mul_neg]]
-  rw [F.JI]
-  simp
-  rw [F.IK]
+  simp only [mul_neg, F.JI, neg_neg, F.IK, smul_neg, smul_add]
   have h1 : ∀ (q : ℍ[ℝ]) (r : ℝ), q * ↑r = r • q := by
     intro q r
     rw [show (r : ℍ[ℝ]) = r • (1 : ℍ[ℝ]) by simp [Quaternion.ext_iff]]
@@ -676,65 +652,36 @@ lemma frame_conj_J (F : QuaternionFrame) (θ : ℝ) :
   rw [h1 F.J (Real.cos θ)]
   simp only [mul_smul_comm]
   rw [h2 F.J (Real.cos θ), h2 F.K (Real.cos θ)]
-  simp [smul_smul]
-  rw [Real.sin_two_mul, Real.cos_two_mul']
-  rw [F.IJ]
-  module
+  rw [smul_smul, Real.sin_two_mul, Real.cos_two_mul', F.IJ]
+  module  -- 一次結合の等式の証明
 
 
 /-- r_q(K) = (-sin2θ)J + (cos2θ)K → JK平面で2θ回転 -/
 lemma frame_conj_K (F : QuaternionFrame) (θ : ℝ) :
-    frameQuaternion F θ * F.K * star (frameQuaternion F θ) =
-      (-Real.sin (2 * θ)) • F.J + Real.cos (2 * θ) • F.K := by
-  rw [frameQuaternion]
-  simp
-  rw [F.star_I]
+    r_q (frameQuaternion F θ) F.K = (-Real.sin (2 * θ)) • F.J + Real.cos (2 * θ) • F.K := by
+  rw [frameQuaternion, r_q, star_add, star_coe, Quaternion.star_smul, neg_smul, F.star_I]
   simp only [add_mul, mul_add, mul_assoc, smul_mul_assoc, mul_smul_comm]
-  rw [show F.K * (-(F.I : ℍ[ℝ])) = -(F.K * F.I) by rw [mul_neg]]
-  rw [F.KI]
-  simp
-  rw [F.IJ]
-  -- Goal: quaternion times real scalar needs simplification
-  -- Quaternion * real = real • Quaternion
+  simp only [mul_neg, F.KI, smul_neg, smul_add, F.IJ]
   have h1 : ∀ (q : ℍ[ℝ]) (r : ℝ), q * ↑r = r • q := by
     intro q r
     rw [show (r : ℍ[ℝ]) = r • (1 : ℍ[ℝ]) by simp [Quaternion.ext_iff]]
     rw [mul_smul_comm, mul_one]
-  rw [h1 (F.K) (Real.cos θ)]
-  simp
-  -- Need: r • q = q * r, which follows from h1 if we can show commutativity for scalars
+  simp only [h1 (F.K) (Real.cos θ), Algebra.mul_smul_comm]
   have h2 : ∀ (q : ℍ[ℝ]) (r : ℝ), ↑r * q = r • q := by
     intro q r
     rw [show (r : ℍ[ℝ]) = r • (1 : ℍ[ℝ]) by simp [Quaternion.ext_iff]]
     rw [smul_mul_assoc, one_mul]
-  rw [h2 (F.K) (Real.cos θ)]
-  rw [h2 (F.J) (Real.cos θ)]
-  rw [F.IK]
-  simp [smul_smul]
-  -- Now need to use trig identities: cos²θ - sin²θ = cos(2θ), 2sinθ cosθ = sin(2θ)
-  have sin2θ : Real.sin (2 * θ) = 2 * Real.sin θ * Real.cos θ := Real.sin_two_mul θ
-  have cos2θ : Real.cos (2 * θ) = Real.cos θ ^ 2 - Real.sin θ ^ 2 := Real.cos_two_mul' θ
-  rw [sin2θ, cos2θ]
+  rw [h2 (F.K) (Real.cos θ), h2 (F.J) (Real.cos θ)]
+  rw [F.IK, smul_neg, Real.sin_two_mul, Real.cos_two_mul']
   module
-
-
-lemma frameQuaternion_norm (F : QuaternionFrame) (θ : ℝ) :
-    ‖frameQuaternion F θ‖ = 1 := by
-  have h := frameQuaternion_normSq F θ
-  rw [Quaternion.normSq_eq_norm_mul_self] at h
-  have := mul_self_eq_one_iff (a := ‖frameQuaternion F θ‖)
-  rw [this] at h
-  rcases h with h | h <;> linarith [norm_nonneg (frameQuaternion F θ)]
 
 
 /-- 3次元空間における「任意の軸u周りの角度φの回転」は, 対応する単位四元数 q = cos(φ/2) + sin(φ/2)u
     による共役作用 x ↦ q * x * star q として表せる. 全射性 -/
 theorem frameRotation_represented (F : QuaternionFrame) (φ : ℝ) :
-    ∃ q : U,
-      q.val = frameQuaternion F (φ / 2) ∧
-      q.val * F.I * star q.val = F.I ∧
-      q.val * F.J * star q.val = Real.cos φ • F.J + Real.sin φ • F.K ∧
-      q.val * F.K * star q.val = (-Real.sin φ) • F.J + Real.cos φ • F.K := by
+    ∃ q : U, q.val = frameQuaternion F (φ / 2) ∧ r_q q F.I = F.I ∧
+          r_q q F.J = Real.cos φ • F.J + Real.sin φ • F.K ∧
+          r_q q F.K = (-Real.sin φ) • F.J + Real.cos φ • F.K := by
   let q : U := ⟨frameQuaternion F (φ / 2), by
     have hs : ‖frameQuaternion F (φ / 2)‖ * ‖frameQuaternion F (φ / 2)‖ = 1 := by
       rw [← Quaternion.normSq_eq_norm_mul_self]
