@@ -220,7 +220,7 @@ lemma exists_conjMatrix_col2 {v0 v1 v2 : ℝ} (h : v0 ^ 2 + v1 ^ 2 + v2 ^ 2 = 1)
       nlinarith [hn2, h]
 
 
--- 第3列目を固定する回転行列R ∈ SO(3) はある単位四元数から生成される
+-- 第3列目が(0, 0, 1)の回転行列R ∈ SO(3) はある単位四元数から生成される
 -- R はz軸周りの回転行列
 lemma exists_conjMatrix_of_col2_eq_e2 {R : Matrix (Fin 3) (Fin 3) ℝ}
     (hR : Rᵀ * R = 1) (hdet : R.det = 1)
@@ -280,7 +280,7 @@ theorem exists_conjMatrix {R : Matrix (Fin 3) (Fin 3) ℝ}
     (hR : Rᵀ * R = 1) (hdet : R.det = 1) :
     ∃ q : ℍ[ℝ], IsUnitQ q ∧ conjMatrix q = R := by
   have e : ∀ i j, (Rᵀ * R) i j = (1 : Matrix (Fin 3) (Fin 3) ℝ) i j := fun i j => by rw [hR]
-  have hcol : R 0 2 ^ 2 + R 1 2 ^ 2 + R 2 2 ^ 2 = 1 := by  -- 左辺の2 2 成分
+  have hcol : R 0 2 ^ 2 + R 1 2 ^ 2 + R 2 2 ^ 2 = 1 := by  -- 左辺の 2 2 成分
     have := e 2 2
     simp [Matrix.mul_apply, Fin.sum_univ_three] at this
     nlinarith [this]
@@ -305,7 +305,7 @@ theorem exists_conjMatrix {R : Matrix (Fin 3) (Fin 3) ℝ}
     (by simpa using hcolN 0) (by simpa using hcolN 1) (by simpa using hcolN 2)
   refine ⟨q₁ * q₂, ?_, ?_⟩
   · exact hq₁.mul hq₂
-  · rw [conjMatrix_mul, hq₂R, hNdef, ← Matrix.mul_assoc, ← hMdef, hM', Matrix.one_mul]
+  · rw [conjMatrix_mul, hq₂R, hNdef, ← hMdef, ← Matrix.mul_assoc, hM', Matrix.one_mul]
 
 /- 仮定を R ∈ SO(3) のみに -/
 theorem exists_conjMatrix_SO (R : SO 3) :
@@ -326,12 +326,11 @@ lemma entries (hA : A ∈ SU 2) : A 1 1 = star (A 0 0) ∧ A 1 0 = -star (A 0 1)
   rw [Matrix.det_fin_two] at hdet
   have hstar : star A * A = 1 := Matrix.mem_unitaryGroup_iff'.mp hU
   have hAB : A * !![A 1 1, -A 0 1; -A 1 0, A 0 0] = 1 := by  -- A * A⁻¹ = 1
-    ext i j
-    fin_cases i <;> fin_cases j <;>
-      simp [Matrix.mul_apply, Fin.sum_univ_two] <;>
-      first
-        | ring1
-        | linear_combination hdet
+    ext i j; fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Fin.sum_univ_two] <;>
+    first
+      | ring1
+      | linear_combination hdet
   have hSB : star A = !![A 1 1, -A 0 1; -A 1 0, A 0 0] :=  -- star A = A⁻¹
     calc star A = star A * (A * !![A 1 1, -A 0 1; -A 1 0, A 0 0]) := by rw [hAB, mul_one]
       _ = (star A * A) * !![A 1 1, -A 0 1; -A 1 0, A 0 0] := by rw [Matrix.mul_assoc]
@@ -452,19 +451,20 @@ variable (q : U) (x : PureImaginary)
 /-- U の ℝ³ への作用 -/
 def r_q (q : ℍ[ℝ]) (x : ℍ[ℝ]) : ℍ[ℝ] := (q : ℍ[ℝ]) * x * (star q : ℍ[ℝ])
 
-/-- h(q) = r_q(x) と定義 -/
-def h (q : ℍ[ℝ]) : ℍ[ℝ] → ℍ[ℝ] := fun x => r_q q x
-
 /-- r_q  は純虚四元数を保つ -/
 lemma r_q_pureim (q : U) (x : PureImaginary) : r_q q x ∈ PureImaginary := by
   have h : x.val.re = 0 := x.prop
   simp [r_q, PureImaginary, h]; ring_nf
 
-/-- h が準同型写像であること -/
-lemma h_homomor (q p : U) : h (q * p) = h q ∘ h p := by
-  funext x
-  simp [h, r_q, Function.comp_apply]
-  noncomm_ring
+
+-- /-- h(q) = r_q(x) と定義 -/  このhではなく, hMatが必要
+-- def h (q : ℍ[ℝ]) : ℍ[ℝ] → ℍ[ℝ] := fun x => r_q q x
+
+-- /-- h が準同型写像であること -/
+-- lemma h_homomor (q p : U) : h (q * p) = h q ∘ h p := by
+--   funext x
+--   simp [h, r_q, Function.comp_apply]
+--   noncomm_ring
 
 /-- 長さを変えない isometry -/
 lemma isometry (q : U) (x : PureImaginary) : ‖r_q q x‖ = ‖x.val‖ := by
@@ -736,9 +736,10 @@ lemma conjugation_kernel (q : U) :
   · intro h x
     rcases h with hq | hq <;> simp [r_q, hq]
 
-
+-- -1 ∈ U
 def minusone : U := ⟨-1, by constructor <;> simp⟩
 
+-- plusminusone = {-1, 1} ⊆ U
 def plusminusone : Subgroup U := Subgroup.closure {minusone}
 
 
@@ -753,16 +754,13 @@ def minusI : SU 2 := ⟨-1, by
 def plusminusI : Subgroup (SU 2) := Subgroup.closure {minusI}
 
 
-
 /-! ### 単位四元数から SO(3) への準同型 -/
-
 
 /-- 単位四元数の座標表示 -/
 lemma isUnitQ_of_mem_U (q : U) : IsUnitQ q.val := by
   have := unitQuaternion_coordinate_equation q
   show q.val.re ^ 2 + q.val.imI ^ 2 + q.val.imJ ^ 2 + q.val.imK ^ 2 = 1
   linarith
-
 
 /-- ノルムが 1 の四元数は単位四元数 -/
 lemma mem_U_of_normSq {q : ℍ[ℝ]} (h : Quaternion.normSq q = 1) : q ∈ U := by
@@ -780,20 +778,22 @@ def hMat : U →* SO 3 where
   map_one' := by ext i j; simp [conjMatrix_one]
   map_mul' p q := by ext i j; simp [conjMatrix_mul]
 
-
 /-- `hMat q` は `r_q q` (純虚四元数 ≅ ℝ³ 上の共役作用) の行列表示になっている -/
 lemma hMat_apply_eq_conj (q : U) (x : ℍ[ℝ]) (hx : x.re = 0) :
     (hMat q).val *ᵥ toVec x = toVec (r_q q x) :=
   conjMatrix_mulVec_toVec q.val x hx
 
+/- r_q q x = q * x * star q : ℍ[ℝ] → conjLin q = toVec (r_q q ofVec x) : (Fin 3 → ℝ)
+  → conjMatrix q = LinearMap.toMatrix' (conjLin q) = hMat : Matrix (Fin 3) (Fin 3) ℝ -/
 
+-- hMat は全射
 lemma hMat_surjective : Function.Surjective hMat := by
-  intro R
+  intro R  -- R ∈ SO 3
   have hR : R.valᵀ * R.val = 1 :=
     (Matrix.mem_orthogonalGroup_iff' (Fin 3) ℝ).mp (Matrix.specialUnitaryGroup_le_unitaryGroup R.2)
   have hdet : R.val.det = 1 := (Matrix.mem_specialUnitaryGroup_iff.mp R.2).2
-  obtain ⟨q, hq, hqR⟩ := exists_conjMatrix hR hdet
-  refine ⟨⟨q, mem_U_of_normSq ((isUnitQ_iff_normSq q).mp hq)⟩, ?_⟩
+  obtain ⟨q, hq, hqR⟩ := exists_conjMatrix hR hdet  -- SO 3 の任意の元はあるqで表せる
+  refine ⟨⟨q, mem_U_of_normSq ((isUnitQ_iff_normSq q).mp hq)⟩, ?_⟩  -- a = q (∈ U) を代入
   exact Subtype.ext hqR
 
 /-- `-1` で生成される部分群は `{1, -1}` -/
@@ -802,21 +802,23 @@ lemma minusone_mul_minusone : minusone * minusone = 1 := by
   show (-1 : ℍ[ℝ]) * (-1 : ℍ[ℝ]) = 1
   norm_num
 
+-- -1 ∈ U, (-1)⁻¹ = -1
 lemma minusone_inv : minusone⁻¹ = minusone := inv_eq_of_mul_eq_one_right minusone_mul_minusone
 
+-- q ∈ Subgroup.closure {minusone} ↔ q = 1 ∨ q = -1
 lemma mem_plusminusone (q : U) : q ∈ plusminusone ↔ q = 1 ∨ q = minusone := by
   constructor
   · intro hq
-    induction hq using Subgroup.closure_induction with
-    | mem x hx => exact Or.inr hx
-    | one => exact Or.inl rfl
-    | mul x y _ _ ihx ihy =>
-        rcases ihx with rfl | rfl <;> rcases ihy with rfl | rfl <;>
-          simp [minusone_mul_minusone]
-    | inv x _ ihx =>
-        rcases ihx with rfl | rfl
-        · exact Or.inl (by simp)
-        · exact Or.inr minusone_inv
+    induction hq using Subgroup.closure_induction with  -- 閉包(最小の閉集合)の帰納法
+    | mem x hx => exact Or.inr hx  -- 生成元(= -1)は命題を満たしているか
+    | one => exact Or.inl rfl      -- 単位元(= 1)の場合
+    | mul x y _ _ ihx ihy =>       -- 演算に関して閉じていること
+      rcases ihx with rfl | rfl <;> rcases ihy with rfl | rfl <;>
+      simp [minusone_mul_minusone]
+    | inv x _ ihx =>               -- 逆元も命題を満たすか
+      rcases ihx with rfl | rfl
+      · exact Or.inl (by simp)
+      · exact Or.inr minusone_inv
   · rintro (rfl | rfl)
     · exact one_mem _
     · exact Subgroup.subset_closure rfl
@@ -835,8 +837,9 @@ lemma hMat_ker : hMat.ker = plusminusone := by
     · exact map_one hMat
     · apply Subtype.ext
       show conjMatrix (-1 : ℍ[ℝ]) = 1
-      simp
+      rw [conjMatrix_neg, conjMatrix_one]
 
+-- h : U →* SO 3 の全射準同型, ker h = {-1, 1} となる写像が存在する
 lemma pre15 : ∃ h : U →* SO 3, Function.Surjective h ∧ h.ker = plusminusone :=
   ⟨hMat, hMat_surjective, hMat_ker⟩
 
@@ -852,18 +855,22 @@ def fSU : SU 2 →* U where
     apply Quaternion.ext <;> simp [toQuat]
   map_mul' A B := Subtype.ext (toQuat_mul B.2)
 
+-- fSU は全射
 lemma fSU_surjective : Function.Surjective fSU := by
   intro q
   exact ⟨⟨ofQuat q.val, ofQuat_mem (unitQuaternion_normSq q)⟩,
     Subtype.ext (toQuat_ofQuat q.val)⟩
 
+-- minusI ∈ SU 2 → -I * -I = I
 lemma minusI_mul_minusI : minusI * minusI = 1 := by
   apply Subtype.ext
   show (-1 : Matrix (Fin 2) (Fin 2) ℂ) * (-1 : Matrix (Fin 2) (Fin 2) ℂ) = 1
   norm_num
 
+-- minusI ∈ SU 2 → (-I)⁻¹ = -I
 lemma minusI_inv : minusI⁻¹ = minusI := inv_eq_of_mul_eq_one_right minusI_mul_minusI
 
+-- A ∈ Subgroup.closure {minusI} ↔ A = I ∨ A = -I
 lemma mem_plusminusI (A : SU 2) : A ∈ plusminusI ↔ A = 1 ∨ A = minusI := by
   constructor
   · intro hA
@@ -871,24 +878,25 @@ lemma mem_plusminusI (A : SU 2) : A ∈ plusminusI ↔ A = 1 ∨ A = minusI := b
     | mem x hx => exact Or.inr hx
     | one => exact Or.inl rfl
     | mul x y _ _ ihx ihy =>
-        rcases ihx with rfl | rfl <;> rcases ihy with rfl | rfl <;>
-          simp [minusI_mul_minusI]
+      rcases ihx with rfl | rfl <;> rcases ihy with rfl | rfl <;>
+      simp [minusI_mul_minusI]
     | inv x _ ihx =>
-        rcases ihx with rfl | rfl
-        · exact Or.inl (by simp)
-        · exact Or.inr minusI_inv
+      rcases ihx with rfl | rfl
+      · exact Or.inl (by simp)
+      · exact Or.inr minusI_inv
   · rintro (rfl | rfl)
     · exact one_mem _
     · exact Subgroup.subset_closure rfl
 
+-- fSU (-I) = -1
 lemma fSU_minusI : fSU minusI = minusone := by
   apply Subtype.ext
   show toQuat (-1 : Matrix (Fin 2) (Fin 2) ℂ) = -1
   apply Quaternion.ext <;> simp [toQuat]
 
-/-- π = h ∘ f⁻¹ : SU 2 → U → SO3, f = ofQuat -/
+/-- π = hMat ∘ fSU : SU 2 → U → SO3 -/
 theorem theorem_15 : ∃ π : SU 2 →* SO 3, Function.Surjective π ∧ π.ker = plusminusI := by
-  refine ⟨hMat.comp fSU, hMat_surjective.comp fSU_surjective, ?_⟩
+  refine ⟨hMat.comp fSU, hMat_surjective.comp fSU_surjective, ?_⟩  -- π = hMat ∘ fSU
   ext A
   rw [MonoidHom.mem_ker, MonoidHom.coe_comp, Function.comp_apply,
     ← MonoidHom.mem_ker, hMat_ker, mem_plusminusone, mem_plusminusI]
@@ -896,39 +904,36 @@ theorem theorem_15 : ∃ π : SU 2 →* SO 3, Function.Surjective π ∧ π.ker 
   · rintro (h | h)
     · left
       apply Subtype.ext
-      exact eq_one_of_toQuat_eq_one A.2 (congrArg Subtype.val h)
+      exact eq_one_of_toQuat_eq_one A.2 (congrArg Subtype.val h)  -- toQuat A = 1 → A = I
     · right
       apply Subtype.ext
-      exact eq_neg_one_of_toQuat_eq_neg_one A.2 (congrArg Subtype.val h)
+      exact eq_neg_one_of_toQuat_eq_neg_one A.2 (congrArg Subtype.val h)  -- toQuat A = -1 → A = -I
   · rintro (rfl | rfl)
     · exact Or.inl (map_one fSU)
     · exact Or.inr fSU_minusI
 
-
+-- 準同型定理, SU 2 ⧸ ker π ≃* Im π
+-- 以下の仮定からなら, この同型が作れる
 def theorem15 [plusminusI.Normal] (π : SU 2 →* SO 3) (surj : Function.Surjective π)
     (kern : π.ker = plusminusI) : SU 2 ⧸ plusminusI ≃* SO 3 :=
   (QuotientGroup.quotientMulEquivOfEq kern.symm).trans (QuotientGroup.quotientKerEquivOfSurjective π surj)
-
 
 /-- `plusminusI = {I, -I}` は正規部分群 -/
 instance plusminusI_normal : plusminusI.Normal := by
   obtain ⟨π, -, kern⟩ := theorem_15
   rw [← kern]
-  infer_instance
+  infer_instance  -- 核は正規部分群
 
-
-/-- `Theorem15` の結論 : `SU(2) / {±I} ≃ SO(3)` -/
+/-- `Theorem15` の結論 : `SU(2) / {±I} ≃ SO(3)`,  実際に同型写像が存在する -/
 theorem SU2_quotient_mulEquiv_SO3 : Nonempty (SU 2 ⧸ plusminusI ≃* SO 3) := by
   obtain ⟨π, surj, kern⟩ := theorem_15
   exact ⟨theorem15 π surj kern⟩
 
 
-
 /-- 行列式が1の2×2複素行列で、2乗が単位行列になるものでかつ単位行列出ないものは -I₂のみ
     M = !![a, b; -b̄, ā] と表したとき、条件 M ^ 2 = I₂ から b = 0 かつ a = ±1 が導かれる -/
-theorem eq_neg_one_of_det_one_of_sq_eq_one
-    (M : Matrix (Fin 2) (Fin 2) ℂ) (hdet : M.det = 1) (hsq : M * M = 1) (hne : M ≠ 1) :
-    M = -1 := by
+theorem eq_neg_one_of_det_one_of_sq_eq_one (M : Matrix (Fin 2) (Fin 2) ℂ)
+    (hdet : M.det = 1) (hsq : M * M = 1) (hne : M ≠ 1) : M = -1 := by
   set a := M 0 0 with ha_def
   set b := M 0 1 with hb_def
   set c := M 1 0 with hc_def
@@ -943,7 +948,7 @@ theorem eq_neg_one_of_det_one_of_sq_eq_one
   have e10 : c * a + d * c = 0 := by
     have := congrFun (congrFun hsq 1) 0
     simpa [Matrix.mul_apply, Fin.sum_univ_succ, Matrix.one_apply] using this
-  -- The trace cannot vanish: otherwise `det M = -1`.
+  -- a + d = 0 だと det = -1
   have hsum : a + d ≠ 0 := by
     intro h
     have h2 : (0 : ℂ) = 2 := by linear_combination hd + e00 - a * h
