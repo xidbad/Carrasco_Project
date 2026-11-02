@@ -30,31 +30,30 @@ lemma aux : minusI₂⁻¹ = minusI₂ := by
 
 -- {I₂, -I₂} が SL(2, ℂ) の部分群
 def sl_cyclic : Subgroup SL(2, ℂ) where
-  carrier := {I₂, minusI₂}                    -- {I₂, -I₂} が SL(2, ℂ) の部分群であること
+  carrier := {I₂, minusI₂}         -- {I₂, -I₂} が SL(2, ℂ) の部分群であること
 
-  one_mem' := by left; rfl                    -- 単位元が含まれること
+  one_mem' := by left; rfl         -- 単位元が含まれること
 
-  mul_mem' := by                              -- 乗法に関して閉じていること
+  mul_mem' := by                   -- 乗法に関して閉じていること
     intro A B HA HB
     simp [I₂, minusI₂] at *
-    rcases HA with rfl | rfl                  -- A = I₂ ∨ A = -I₂
-    · rcases HB with rfl | rfl                -- A = I₂ ∧ (B = I₂ ∨ B = -I₂)
-      · left                                  -- A = I₂, B = I₂ の場合 A * B = I₂
-        simp; rfl                             -- 左辺の type は Matrix 2 2 ℂ かつ行列式が 1, 右辺は SL(2,ℂ)
-      · right                                 -- A = I₂, B = -I₂ の場合 A * B = -I₂
-        simp; rfl
-    · rcases HB with rfl | rfl                -- A = -I₂ ∧ (B = I₂ ∨ B = -I₂)
-      · right                                 -- A = -I₂, B = I₂ の場合 A * B = -I₂
-        simp; rfl
-      · left; aesop                           -- A = -I₂, B = -I₂ の場合 A * B = I₂
+    rcases HA with rfl | rfl       -- A = I₂ ∨ A = -I₂
+    · rcases HB with rfl | rfl     -- A = I₂ ∧ (B = I₂ ∨ B = -I₂)
+      · left                       -- A = I₂, B = I₂ の場合 A * B = I₂
+        rw [mul_eq_left]; rfl                  -- 左辺の type は Matrix 2 2 ℂ かつ行列式が 1, 右辺は SL(2,ℂ)
+      · right                      -- A = I₂, B = -I₂ の場合 A * B = -I₂
+        rw [mul_eq_right]; rfl
+    · rcases HB with rfl | rfl     -- A = -I₂ ∧ (B = I₂ ∨ B = -I₂)
+      · right                      -- A = -I₂, B = I₂ の場合 A * B = -I₂
+        rw [mul_eq_left]; rfl
+      · left; aesop                -- A = -I₂, B = -I₂ の場合 A * B = I₂
 
-  inv_mem' := by                              -- 逆元に関して閉じていること
+  inv_mem' := by                   -- 逆元に関して閉じていること
     intro x hx
-    rcases hx with hid | hminusid             -- x = I₂ ∨ x = -I₂
-    · left                                    -- x = I₂ の場合 x⁻¹ = I₂
-      rw [hid]; simp [I₂]
+    rcases hx with hid | hminusid  -- x = I₂ ∨ x = -I₂
+    · left; rw [hid, I₂]           -- x = I₂ の場合 x⁻¹ = I₂
       aesop
-    · rw [hminusid]                           -- x = -I₂ の場合 x⁻¹ = -I₂
+    · rw [hminusid]                -- x = -I₂ の場合 x⁻¹ = -I₂
       simp [I₂]
       right; rw [aux]
 

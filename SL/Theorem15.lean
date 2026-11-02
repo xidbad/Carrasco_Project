@@ -49,9 +49,13 @@ def conjLin (q : ℍ[ℝ]) : (Fin 3 → ℝ) →ₗ[ℝ] (Fin 3 → ℝ) where
 
 -- `i, j, k` を基底とするq による共役作用の行列表示
 /- q = q₀ + q₁i + q₂j + q₃k, v = (v₁, v₂, v₃) とすると,
-conjLin q v = 0 + {(q₀² + q₁² - q₂² - q₃²)v₁ + 2(q₁q₂ - q₀q₃)v₂ + 2(q₁q₃ + q₀q₂)v₃}i
-                + {2(q₁q₂ + q₀q₃)v₁ + (q₀² - q₁² + q₂² - q₃²)v₂ + 2(q₂q₃ - q₀q₁)v₃}j
-                + {2(q₁q₃ - q₀q₂)v₁ + 2(q₂q₃ + q₀q₁)v₂ + (q₀² - q₁² - q₂² + q₃²)v₃}k
+r_q q (ofVec v) = 0 + {(q₀² + q₁² - q₂² - q₃²)v₁ + 2(q₁q₂ - q₀q₃)v₂ + 2(q₁q₃ + q₀q₂)v₃}i
+                    + {2(q₁q₂ + q₀q₃)v₁ + (q₀² - q₁² + q₂² - q₃²)v₂ + 2(q₂q₃ - q₀q₁)v₃}j
+                    + {2(q₁q₃ - q₀q₂)v₁ + 2(q₂q₃ + q₀q₁)v₂ + (q₀² - q₁² - q₂² + q₃²)v₃}k : ℍ[ℝ]
+
+conjLin q v = ((q₀² + q₁² - q₂² - q₃²)v₁ + 2(q₁q₂ - q₀q₃)v₂ + 2(q₁q₃ + q₀q₂)v₃,
+                2(q₁q₂ + q₀q₃)v₁ + (q₀² - q₁² + q₂² - q₃²)v₂ + 2(q₂q₃ - q₀q₁)v₃,
+                2(q₁q₃ - q₀q₂)v₁ + 2(q₂q₃ + q₀q₁)v₂ + (q₀² - q₁² - q₂² + q₃²)v₃) : Fin 3 → ℝ
 
 conjLin q v = conjMatrix q (v₁ v₂ v₃)ᵀ  -/
 def conjMatrix (q : ℍ[ℝ]) : Matrix (Fin 3) (Fin 3) ℝ := LinearMap.toMatrix' (conjLin q)
@@ -783,7 +787,7 @@ lemma hMat_apply_eq_conj (q : U) (x : ℍ[ℝ]) (hx : x.re = 0) :
     (hMat q).val *ᵥ toVec x = toVec (r_q q x) :=
   conjMatrix_mulVec_toVec q.val x hx
 
-/- r_q q x = q * x * star q : ℍ[ℝ] → conjLin q = toVec (r_q q ofVec x) : (Fin 3 → ℝ)
+/- r_q q x = q * x * star q : ℍ[ℝ] → conjLin q = toVec (r_q q ofVec v) : (Fin 3 → ℝ)
   → conjMatrix q = LinearMap.toMatrix' (conjLin q) = hMat : Matrix (Fin 3) (Fin 3) ℝ -/
 
 -- hMat は全射
