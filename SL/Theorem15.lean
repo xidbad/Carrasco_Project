@@ -787,7 +787,7 @@ lemma hMat_apply_eq_conj (q : U) (x : ℍ[ℝ]) (hx : x.re = 0) :
     (hMat q).val *ᵥ toVec x = toVec (r_q q x) :=
   conjMatrix_mulVec_toVec q.val x hx
 
-/- r_q q x = q * x * star q : ℍ[ℝ] → conjLin q = toVec (r_q q ofVec v) : (Fin 3 → ℝ)
+/- r_q q x = q * x * star q : ℍ[ℝ] → conjLin q v = toVec (r_q q ofVec v) : (Fin 3 → ℝ)
   → conjMatrix q = LinearMap.toMatrix' (conjLin q) = hMat : Matrix (Fin 3) (Fin 3) ℝ -/
 
 -- hMat は全射
@@ -829,8 +829,7 @@ lemma mem_plusminusone (q : U) : q ∈ plusminusone ↔ q = 1 ∨ q = minusone :
 
 /-- `hMat` の核は `{1, -1}` -/
 lemma hMat_ker : hMat.ker = plusminusone := by
-  ext q
-  rw [MonoidHom.mem_ker, mem_plusminusone]
+  ext q; rw [MonoidHom.mem_ker, mem_plusminusone]
   constructor
   · intro hq
     have h1 : conjMatrix q.val = 1 := congrArg Subtype.val hq
@@ -943,16 +942,16 @@ theorem eq_neg_one_of_det_one_of_sq_eq_one (M : Matrix (Fin 2) (Fin 2) ℂ)
   set c := M 1 0 with hc_def
   set d := M 1 1 with hd_def
   have hd : a * d - b * c = 1 := by rw [Matrix.det_fin_two] at hdet; exact hdet
-  have e00 : a * a + b * c = 1 := by
+  have e00 : a * a + b * c = 1 := by  -- M * M = 1 の (0, 0) 成分
     have := congrFun (congrFun hsq 0) 0
     simpa [Matrix.mul_apply, Fin.sum_univ_succ, Matrix.one_apply] using this
-  have e01 : a * b + b * d = 0 := by
+  have e01 : a * b + b * d = 0 := by  -- M * M = 1 の (0, 1) 成分
     have := congrFun (congrFun hsq 0) 1
     simpa [Matrix.mul_apply, Fin.sum_univ_succ, Matrix.one_apply] using this
-  have e10 : c * a + d * c = 0 := by
+  have e10 : c * a + d * c = 0 := by  -- M * M = 1 の (1, 0) 成分
     have := congrFun (congrFun hsq 1) 0
     simpa [Matrix.mul_apply, Fin.sum_univ_succ, Matrix.one_apply] using this
-  -- a + d = 0 だと det = -1
+  -- a + d = 0 だと det = -1 → ∵ d = -a, det = a * d - b * c = -a^2 - b * c = - (a^2 + b * c) = -1
   have hsum : a + d ≠ 0 := by
     intro h
     have h2 : (0 : ℂ) = 2 := by linear_combination hd + e00 - a * h
@@ -972,7 +971,7 @@ theorem eq_neg_one_of_det_one_of_sq_eq_one (M : Matrix (Fin 2) (Fin 2) ℂ)
     · exact absurd haa (by rw [h]; norm_num)
     · linear_combination h
   rcases mul_eq_zero.1 (show (a - 1) * (a + 1) = 0 by linear_combination haa) with h | h
-  · -- `a = 1` would give `M = I₂`, which is excluded.
+  · -- `a = 1` だと M = 1 となるので矛盾
     refine absurd ?_ hne
     have ha : a = 1 := by linear_combination h
     rw [Matrix.eta_fin_two M, ← ha_def, ← hb_def, ← hc_def, ← hd_def, ha, hb, hc, hda, ha]
@@ -982,7 +981,6 @@ theorem eq_neg_one_of_det_one_of_sq_eq_one (M : Matrix (Fin 2) (Fin 2) ℂ)
     rw [Matrix.eta_fin_two M, ← ha_def, ← hb_def, ← hc_def, ← hd_def, ha, hb, hc, hda, ha]
     ext i j
     fin_cases i <;> fin_cases j <;> simp
-
 
 /-- U ∈ SU(2), order U = 2 ならば U = -I₂ -/
 theorem prop16 (U : SU 2) (hU : orderOf U = 2) :

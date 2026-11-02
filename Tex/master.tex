@@ -1,0 +1,56 @@
+%!LW recipe = latexmk (XeLaTeX)
+\documentclass[xelatex,a4paper,ja=standard]{bxjsreport}
+
+
+% --- 数学・記号系 ---
+\usepackage{amsmath,amsthm,mathtools}
+\usepackage{amssymb}  %（amsfontsを自動で含む)
+
+\usepackage{geometry}
+\geometry{margin=25truemm}
+\geometry{top=15truemm}
+\usepackage{expl3}
+\usepackage[unicode,colorlinks=true,linkcolor=blue,urlcolor=magenta, citecolor=blue]{hyperref}
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
+
+\usepackage{tcolorbox}
+
+\usepackage{fontspec}
+
+
+\newtheorem{definition}{定義}%[section]
+\newtheorem{theorem}[definition]{定理}%[section]
+\newtheorem{lemma}[definition]{補題}%[section]
+\newtheorem{prop}[definition]{命題}%[section]
+\newtheorem{corollary}[definition]{系}%[section]
+
+
+\title{研究内容}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+%\renewcommand{\thesection}{\arabic{section}}
+
+\begin{definition}[特殊線形群]
+    \(SL(n, \mathbb{C}) = \{ A \in M_n(\mathbb{C}) \mid \det(A) = 1 \}\) \par
+    特に, \(n = 2\) のとき, \(SL(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ c & d \end{pmatrix} : a, b, c, d, \in \mathbb{C} \mid det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc = 1\}\)
+\end{definition}
+
+\begin{theorem}[\(SL(2, \mathbb{C})\) の部分群]
+    \(G \subset SL(2, \mathbb{C}), |G| < \infty\) のとき, \(G\) は共役を除いて以下のいずれかである.
+
+    • 巡回群 \(\mathbb{Z}/n\mathbb{Z}, n \in \mathbb{N}\) \par
+    • バイナリー二面体群 \(BD_{4n}, n \in \mathbb{N}\) \par
+    • プラトン立体に対応するバイナリー群 \(BT_{24}, BO_{48}, BI_{120}\)
+    (プラトン立体 : 全ての面が合同な正多面体, \par BT : バイナリー四面体群, BO : バイナリー八面体群, BI : バイナリー二十面体群)
+\end{theorem}
+
+\begin{corollary}
+    位数 \(n\) の巡回群は, \(SL(2, \mathbb{C})\) の有限部分群である.
+\end{corollary}
+
+\end{document}
