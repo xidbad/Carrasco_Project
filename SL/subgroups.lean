@@ -82,16 +82,16 @@ def cyclic_subgroup : Subgroup SL(2, ℂ) where
   mul_mem' := by               -- A n ^ k * A n ^ m = A n ^ (k + m)
     intro a b ⟨k, hk⟩ ⟨m, hm⟩
     use k + m
-    rw [hk, hm, _root_.zpow_add]
+    rw [hk, hm, zpow_add]
 
   inv_mem' := by       -- (A n ^ k)⁻¹ = A n ^ (-k)
     intro a ⟨k, hk⟩
     use -k
-    rw [hk, _root_.zpow_neg]
+    rw [hk, zpow_neg]
 
 -- 2. 巡回群から SL(2, ℂ) への群準同型
-def cyclicSubgroup : Subgroup SL(2, ℂ) :=
-  Subgroup.zpowers (M n)  -- M n を生成元とする巡回群, Subgroup.closure {M n}
+def cyclicSubgroup : Subgroup SL(2, ℂ) := Subgroup.zpowers (M n)
+  -- M n を生成元とする巡回群, Subgroup.closure {M n}
 
 -- ζ n ^ k ≠ 1 for 0 < k < n
 lemma pow_ne_one (k : ℕ) (hk : 0 < k ∧ k < n) (hlt : 1 < n) : ζ n ^ k ≠ 1 := by
@@ -174,14 +174,14 @@ lemma h₁ (k : ℤ) : j * A n ^ k = A n ^ (-k) * j := by
   | zero =>
   · rw [zpow_zero, mul_one, neg_zero, zpow_zero, one_mul]
   | succ a ha =>
-  · rw [_root_.zpow_add, zpow_one, ← mul_assoc, ha, neg_add, _root_.zpow_add, _root_.zpow_neg]
-    rw [mul_assoc, mul_assoc, mul_right_inj, _root_.zpow_neg, zpow_one]
+  · rw [zpow_add, zpow_one, ← mul_assoc, ha, neg_add, zpow_add, zpow_neg]
+    rw [mul_assoc, mul_assoc, mul_right_inj, zpow_neg, zpow_one]
     ext i j
     fin_cases i <;> fin_cases j <;>
     simp [j, A] <;> simp [h₀, h₁]
   | pred a ha =>
-  · rw [_root_.zpow_sub, zpow_one, ← mul_assoc, ha, neg_neg, neg_sub, sub_neg_eq_add]
-    rw [add_comm, _root_.zpow_add, zpow_one, mul_assoc, mul_assoc, mul_right_inj]
+  · rw [zpow_sub, zpow_one, ← mul_assoc, ha, neg_neg, neg_sub, sub_neg_eq_add]
+    rw [add_comm, zpow_add, zpow_one, mul_assoc, mul_assoc, mul_right_inj]
     ext i j; fin_cases i <;> fin_cases j <;> simp [A, j]
     <;> simp [h₀, h₁]
 
@@ -194,15 +194,15 @@ lemma h₂ (hn : n ≠ 0) : j * j = A n ^ n := by
   ext i j
   simp only [SpecialLinearGroup.coe_pow]
   rw [diagonal_pow]
-  fin_cases i <;> fin_cases j <;> simp [ω, ← exp_nsmul, ← mul_div_assoc]
-  <;> rw [mul_comm, mul_div_assoc, div_self (by simp [hn]), mul_one, exp_pi_mul_I]
+  fin_cases i <;> fin_cases j <;> simp [ω, ← exp_nsmul, ← mul_div_assoc] <;>
+  rw [mul_comm, mul_div_assoc, div_self (by simp [hn]), mul_one, exp_pi_mul_I]
   rw [inv_neg, inv_one]
 
 lemma h₃ (k : ℤ) : j⁻¹ * A n ^ (-k) = A n ^ k * j⁻¹ := by
   have h := h₁ n k
   apply_fun (λ x => j⁻¹ * x * j⁻¹) at h
   simp [← mul_assoc] at h
-  rw [h, _root_.zpow_neg]
+  rw [h, zpow_neg]
 
 lemma h₄ (hn : n ≠ 0) : j⁻¹ = (A n ^ n)⁻¹ * j := by
   have h := h₂ n hn
@@ -226,27 +226,26 @@ def binary_dihedral_subgrup : Subgroup SL(2, ℂ) where
 
   mul_mem' := by
     rintro M N ⟨k, (hMA | hMB)⟩ ⟨l, (hNA | hNB)⟩
-    -- rw [binary_dihedral_set, Set.mem_setOf_eq]
     · use k + l; left
-      simp only [hMA, hNA]
-      rw [_root_.zpow_add]
+      rw [hMA, hNA]
+      rw [zpow_add]
     · use k + l; right
-      simp only [hMA, hNB]
-      rw [← mul_assoc, _root_.zpow_add]
+      rw [hMA, hNB]
+      rw [← mul_assoc, zpow_add]
     · use k - l; right
       rw [hMB, hNA]
-      rw [mul_assoc, h₁, ← mul_assoc, _root_.zpow_sub, _root_.zpow_neg]
+      rw [mul_assoc, h₁, ← mul_assoc, zpow_neg, ← zpow_sub]
     · use k - l + n; left
       rw [hMB, hNB]
-      simp [mul_assoc, ← mul_assoc j, h₁, h₂ n hn, _root_.zpow_sub, _root_.zpow_add]
+      rw [mul_assoc, ← mul_assoc j, h₁, mul_assoc, h₂ n hn, ← mul_assoc, zpow_neg, ← zpow_sub, zpow_add, zpow_natCast]
 
   inv_mem' := by
     rintro M ⟨k, (hMA | hMB)⟩
     · use -k; left
-      simp only [hMA, A, _root_.zpow_neg]
+      rw [hMA, zpow_neg]
     · use k - n; right
-      rw [hMB, _root_.mul_inv_rev, ← _root_.zpow_neg, h₃, h₄ n hn, ← mul_assoc, mul_left_inj]
-      rw [_root_.zpow_sub, _root_.zpow_natCast]
+      rw [hMB, _root_.mul_inv_rev, ← zpow_neg, h₃, h₄ n hn, ← mul_assoc, mul_left_inj]
+      rw [zpow_sub, zpow_natCast]
 
 
 -- [BinaryTetrahedralGroup₂₄] --
@@ -258,8 +257,7 @@ def B : SL(2, ℂ) :=
   ⟨M, by simp [M, det_fin_two]; ring_nf; rw [I_sq]; norm_num⟩
 
 /-- BT24 を SL(2, ℂ) の部分群として定義する -/
-def BT24 : Subgroup SL(2, ℂ) :=
-  Subgroup.closure {i, j, B}
+def BT24 : Subgroup SL(2, ℂ) := Subgroup.closure {i, j, B}
 
 def BT24_subgroup : Subgroup SL(2, ℂ) where
   carrier := {M | M ∈ BT24}
@@ -283,8 +281,7 @@ def C : SL(2, ℂ) :=
   ⟨M, by simp [M]; ring_nf; rw [I_sq]; norm_num; rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num⟩
 
 
-def BO48 : Subgroup SL(2, ℂ) :=
-  Subgroup.closure {i, j, B, C}
+def BO48 : Subgroup SL(2, ℂ) := Subgroup.closure {j, B, C}
 
 def BO48_subgroup : Subgroup SL(2, ℂ) where
   carrier := {M | M ∈ BO48}
@@ -307,10 +304,11 @@ def D : SL(2, ℂ) :=
   let M : Matrix (Fin 2) (Fin 2) ℂ := inv2 • !![phi + I * (phi - 1), 1; -1, phi - I * (phi - 1)]
   ⟨M, by simp [M, phi, inv2]; ring_nf; rw [I_sq]; norm_num; rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num⟩
 
+def E : SL(2, ℂ) :=
+  ⟨!![exp (Real.pi * I / 5), 0; 0, exp (- Real.pi * I / 5)], by simp [← exp_add]⟩
 
 /-- BI120 を生成元からなる部分群として定義 -/
-def BI120 : Subgroup SL(2, ℂ) :=
-  Subgroup.closure {i, j, B, D}
+def BI120 : Subgroup SL(2, ℂ) := Subgroup.closure {i, j, D}
 
 def BI120_subgroup : Subgroup SL(2, ℂ) where
   carrier := {M | M ∈ BI120}

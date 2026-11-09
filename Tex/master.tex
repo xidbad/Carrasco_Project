@@ -6,14 +6,10 @@
 \usepackage{amsmath,amsthm,mathtools}
 \usepackage{amssymb}  %（amsfontsを自動で含む)
 
-\usepackage{geometry}
-\geometry{margin=25truemm}
-\geometry{top=15truemm}
-\usepackage{expl3}
-\usepackage[unicode,colorlinks=true,linkcolor=blue,urlcolor=magenta, citecolor=blue]{hyperref}
-\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
 
-\usepackage{tcolorbox}
+\usepackage{expl3}
+
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
 
 \usepackage{fontspec}
 
@@ -31,26 +27,154 @@
 
 \begin{document}
 
-\maketitle
-
-%\renewcommand{\thesection}{\arabic{section}}
+% \maketitle
 
 \begin{definition}[特殊線形群]
-    \(SL(n, \mathbb{C}) = \{ A \in M_n(\mathbb{C}) \mid \det(A) = 1 \}\) \par
-    特に, \(n = 2\) のとき, \(SL(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ c & d \end{pmatrix} : a, b, c, d, \in \mathbb{C} \mid det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc = 1\}\)
+    \(\mathrm{SL}(n, \mathbb{C}) := \{ A \in M_n(\mathbb{C}) \mid \det(A) = 1 \}\) \par
+    特に, \(n = 2\) のとき, \(\mathrm{SL}(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ c & d \end{pmatrix} : a, b, c, d, \in \mathbb{C} \mid det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc = 1\}\)
 \end{definition}
 
-\begin{theorem}[\(SL(2, \mathbb{C})\) の部分群]
-    \(G \subset SL(2, \mathbb{C}), |G| < \infty\) のとき, \(G\) は共役を除いて以下のいずれかである.
+% \begin{theorem}[\(\mathrm{SL}(2, \mathbb{C})\) の部分群]
+%     \(G \subset \mathrm{SL}(2, \mathbb{C}), |G| < \infty\) のとき, \(G\) は共役を除いて以下のいずれかである.
 
-    • 巡回群 \(\mathbb{Z}/n\mathbb{Z}, n \in \mathbb{N}\) \par
-    • バイナリー二面体群 \(BD_{4n}, n \in \mathbb{N}\) \par
-    • プラトン立体に対応するバイナリー群 \(BT_{24}, BO_{48}, BI_{120}\)
-    (プラトン立体 : 全ての面が合同な正多面体, \par BT : バイナリー四面体群, BO : バイナリー八面体群, BI : バイナリー二十面体群)
+%     • 巡回群 \(\mathbb{Z}/n\mathbb{Z}, n \in \mathbb{N}\) \par
+%     • バイナリー二面体群 \(BD_{4n}, n \in \mathbb{N}\) \par
+%     • プラトン立体に対応するバイナリー群 \(BT_{24}, BO_{48}, BI_{120}\)
+%     (プラトン立体 : 全ての面が合同な正多面体, \par BT : バイナリー四面体群, BO : バイナリー八面体群, BI : バイナリー二十面体群)
+% \end{theorem}
+
+
+\begin{lemma}
+    \(\zeta_n = e^{2\pi i/n} (n \in \mathbb{N})\) とし, 行列 \(M = \begin{pmatrix} \zeta_n & 0 \\ 0 & \zeta_n^{-1} \end{pmatrix} \in \mathrm{SL}(2, \mathbb{C})\)
+    で生成される部分群を \(G := \langle M \rangle\) とおく.
+    このとき, \(G\) は位数 \(n\) の巡回群であり, 特に \(\mathrm{SL}(2, \mathbb{C})\) の有限部分群である.
+
+    \begin{proof}
+        \(G = \langle M \rangle\) は単一の元 \(M \in \mathrm{SL}(2, \mathbb{C})\) で生成されるため, 定義より \(\mathrm{SL}(2, \mathbb{C})\) の巡回部分群である.
+
+        (以下はコード参考 :
+        まず, \(G = \{M^k \mid k \in \mathbb{Z}\}\) が \(\mathrm{SL}(2, \mathbb{C})\) の部分群であることを示す. \\
+        \(k = 0\) とすると, \(M^0 = I_2 \in G\) より, 単位元を含む. \\
+        任意の \(M^a, M^b \in G (a, b \in \mathbb{Z})\) に対し, \(M^a M^b = M^{a+b} \in G\) より, 積について閉じている. \\
+        任意の \(M^k \in G (k \in \mathbb{Z})\) に対し, \((M^k)^{-1} = M^{-k} \in G\) より, 逆元について閉じている. \\
+        したがって, \(G\) は \(\mathrm{SL}(2, \mathbb{C})\) の部分群である.)
+
+        次に, \(G\) の位数を求める.
+        \(\zeta_n\) の原始根の定義から, \(\zeta_n^n = 1\) かつ \(\zeta_n^k \neq 1 (0 < k < n)\) より,
+        \(M^n = I_2\) かつ, 任意の \(k \in \{1, 2, \dots, n-1\}\) に対して, \(M^k \neq I_2\) であるため,
+        生成元 \(M\) の位数は \(\mathrm{ord}(M) = n\) であり, \(G\) の要素数は \(|G| = n\) となる.
+        以上より, \(G\) は \(\mathrm{SL}(2, \mathbb{C})\) の位数 \(n\) の有限巡回部分群である.
+    \end{proof}
+\end{lemma}
+
+
+\begin{definition}[バイナリー二面体群]
+    \(n \in \mathbb{N}\), \(A = \begin{pmatrix} e^{\pi i/n} & 0 \\ 0 & e^{-\pi i/n} \end{pmatrix}\),
+    \(B = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\) とする.
+    このとき, \(BD_{4n} := \langle A, B \rangle = \{A^k, A^k B \mid k \in \mathbb{Z}\}\)
+    をバイナリー二面体群(binary dihedral group)と呼ぶ. (\(B^2 = A^n = -I_2\) であることに注意)
+\end{definition}
+
+
+\begin{lemma}
+    バイナリー二面体群 \(BD_{4n}\) は位数 \(4n\) の \(\mathrm{SL}(2, \mathbb{C})\) の有限部分群である.
+    \begin{proof}
+        \(BD_{4n}\) は \(\mathrm{SL}(2, \mathbb{C})\) の部分集合 \(\{A, B\}\) によって生成されるため部分群である.
+        
+        (以下はコード参考 :
+        まず, \(BD_{4n}\) が \(\mathrm{SL}(2, \mathbb{C})\) の部分群であることを示す. \\
+        \(k = 0\) とすると, \(A^0 = I_2 \in BD_{4n}\) より, 単位元を含む. \\
+        任意の \(a, b \in \mathbb{Z}\) に対し, \(B A^a = A^{-a} B\) や \(B^2 = A^n\) から,
+        \(A^a A^b = A^{a+b} \in BD_{4n}\),
+        \(A^a A^b B = A^{a+b} B \in BD_{4n}\),
+        \(A^a B A^b = A^a A^{-b} B = A^{a-b} B \in BD_{4n}\),
+        \(A^a B A^b B = A^a A^{-b} B B = A^a A^{-b} A^n = A^{a-b+n} \in BD_{4n}\) より, 積について閉じている. \\
+        任意の \(k \in \mathbb{Z}\) に対し, \(B^{-1} A^{-k} = A^k B^{-1}\) や \(B^{-1} = A^{-n} B\) から,
+        \((A^k)^{-1} = A^{-k} \in BD_{4n}\),
+        \((A^k B)^{-1} = B^{-1} A^{-k} = A^k B^{-1} = A^k A^{-n} B = A^{k-n} B \in BD_{4n}\) より, 逆元について閉じている.
+        したがって, \(BD_{4n}\) は \(\mathrm{SL}(2, \mathbb{C})\) の部分群である.)
+
+        次に, \(BD_{4n}\) の位数を求める.
+        \(BD_{4n} = \{A^k, A^k B \mid k \in \mathbb{Z}\}\) であり, \(A^{2n} = I_2\) かつ \(B^2 = A^n\) であることから,
+        \(BD_{4n}\) の元は \(A^k\) と \(A^k B\) の形で \(0 \leq k < 2n\) の \(4n\) 個の元からなる.
+        よって, \(BD_{4n}\) は位数 \(4n\) の有限部分群である.
+    \end{proof}
+\end{lemma}
+
+
+\begin{definition}[バイナリー四面体群]
+    \(A = \begin{pmatrix} i & 0 \\ 0 & -i \end{pmatrix}\),
+    \(B = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\),
+    \(C = \frac{1}{2} \begin{pmatrix} 1 + i & 1 + i \\ -1 + i & 1 - i \end{pmatrix}\) とする.
+    このとき, \(BT_{24} := \langle A, B, C \rangle\) をバイナリー四面体群(binary tetrahedral group)と呼ぶ.
+    なお, \(BT_{24}\) は, プラトン立体の一つである正四面体に対応する群である.
+\end{definition}
+
+
+\begin{lemma}
+    バイナリー四面体群 \(BT_{24}\) は, \(\mathrm{SL}(2, \mathbb{C})\) の部分群であり, 位数 \(24\) を持つ.
+    \begin{proof}
+    
+    \end{proof}
+\end{lemma}
+
+
+\begin{definition}[バイナリー八面体群]
+    \(A = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\),
+    \(B = \frac{1}{2} \begin{pmatrix} 1 + i & 1 + i \\ -1 + i & 1 - i \end{pmatrix}\),
+    \(C = \frac{1}{\sqrt{2}} \begin{pmatrix} 1 + i & 0 \\ 0 & 1 - i \end{pmatrix}\) とする.
+    このとき, \(BO_{48} := \langle A, B, C \rangle\) をバイナリー八面体群(binary octahedral group)と呼ぶ.
+    なお, \(BO_{48}\) は, プラトン立体の一つである正八面体に対応する群である.
+\end{definition}
+
+
+\begin{lemma}
+    バイナリー八面体群 \(BO_{48}\) は, \(\mathrm{SL}(2, \mathbb{C})\) の部分群であり, 位数 \(48\) を持つ.
+    \begin{proof}
+    
+    \end{proof}
+\end{lemma}
+
+
+
+\begin{definition}[バイナリー二十面体群]
+    \(A = \begin{pmatrix} i & 0 \\ 0 & -i \end{pmatrix}\),
+    \(B = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\),
+    \(C = \frac{1}{2} \begin{pmatrix} 1 + i & 1 + i \\ -1 + i & 1 - i \end{pmatrix}\),
+    \(D = \frac{1 + \sqrt{5}}{2} \begin{pmatrix} e^{\pi i/5} + e^{9\pi i/5} & e^{3\pi i/5} + e^{7\pi i/5} \\ -e^{3\pi i/5} + e^{7\pi i/5} & e^{\pi i/5} - e^{9\pi i/5} \end{pmatrix}\) とする.
+    このとき, \(BI_{120} := \langle A, B, C, D \rangle\) をバイナリー二十面体群(binary icosahedral group)と呼ぶ.
+    なお, \(BI_{120}\) は, プラトン立体の一つである正二十面体に対応する群である.
+\end{definition}
+
+
+\begin{lemma}
+    バイナリー二十面体群 \(BI_{120}\) は, \(\mathrm{SL}(2, \mathbb{C})\) の部分群であり, 位数 \(120\) を持つ.
+    \begin{proof}
+    
+    \end{proof}
+\end{lemma}
+
+
+
+\begin{definition}[特殊ユニタリ群]
+    \(\mathrm{SU}(n, \mathbb{C}) := \{U \in \mathrm{SL}(n, \mathbb{C}) \mid U^* U = U U^* = I_n\}\) \par
+    特に, \(n = 2\) のとき, \(\mathrm{SU}(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ -\overline{b} & \overline{a} \end{pmatrix}
+    : a, b \in \mathbb{C} \mid |a|^2 + |b|^2 = 1\}\)
+
+    \begin{proof}
+        
+    \end{proof}
+\end{definition}
+
+
+\begin{theorem}
+    \(\mathrm{SL}(2, \mathbb{C})\) の任意の有限部分群は, \(\mathrm{SU}(2, \mathbb{C})\) のある有限部分群と共役である.
+
+    \begin{proof}
+        エルミート内積を不変に保つ
+    \end{proof}
 \end{theorem}
 
-\begin{corollary}
-    位数 \(n\) の巡回群は, \(SL(2, \mathbb{C})\) の有限部分群である.
-\end{corollary}
+
 
 \end{document}
