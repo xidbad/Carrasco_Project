@@ -61,9 +61,9 @@ def sl_cyclic : Subgroup SL(2, ℂ) where
 variable (n : ℕ) (hn : n ≠ 0)
 
 
--- [位数nの巡回群] --
+-- [位数nの巡回群] --  closureで書き直し
 
-def ε (n : ℕ) : ℂ := exp (2 * (Real.pi : ℂ) * I / n)  -- ε = e^(2πi/n)
+def ε (n : ℕ) : ℂ := exp (2 * (Real.pi : ℂ) * I / n)  -- ε n = e^(2πi/n)
 
 -- 1. 生成元 M : 回転に対応する行列
 def M : SL(2, ℂ) :=
@@ -72,6 +72,8 @@ def M : SL(2, ℂ) :=
 
 -- A n のべき乗全体の集合（Set）を定義
 def cyclicSet : Set (SL(2, ℂ)) := {g | ∃ k : ℤ, g = M n ^ k}
+
+def cyclicSet' : Set (SL(2, ℂ)) := Subgroup.closure {M n}
 
 -- cyclicSet が SL(2, ℂ)の部分群であること
 def cyclic_subgroup : Subgroup SL(2, ℂ) where
@@ -123,7 +125,7 @@ lemma pow_ne_one (k : ℕ) (hk : 0 < k ∧ k < n) (hlt : 1 < n) : ε n ^ k ≠ 1
 -- 3. この部分群が位数 n の巡回群であることを示す
 theorem finite_cyclic_subgroup_exists (hn : n ≠ 0) :
     ∃ (G : Subgroup SL(2, ℂ)), IsCyclic G ∧ Nat.card G = n := by
-  use cyclicSubgroup n
+  use cyclic_subgroup n
   constructor
   · exact Subgroup.isCyclic_zpowers (M n)        -- zpowers で生成されているので定義から巡回群
   · rw [cyclicSubgroup, Nat.card_zpowers (M n)]  -- M n のみで生成される → 位数が元の位数と等しい
@@ -156,7 +158,7 @@ theorem finite_cyclic_subgroup_exists (hn : n ≠ 0) :
 
 -- 1. 生成元 A : 回転に対応する行列
 def A : SL(2, ℂ) :=
-  let M : Matrix (Fin 2) (Fin 2) ℂ := diagonal ![ε (2*n), (ε (2*n))⁻¹]  -- !![ε 2n, 0; 0, (ε 2n)⁻¹]
+  let M : Matrix (Fin 2) (Fin 2) ℂ := diagonal ![ε (2*n), (ε (2*n))⁻¹]  -- !![ε 2n, 0; 0, (ε 2n)⁻¹], ε 2n = exp (πi/n)
   ⟨M, by simp [M, ε]⟩
 
 -- 2. 生成元 j : 四元数の j に相当する行列
