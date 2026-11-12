@@ -44,8 +44,63 @@
 % \end{theorem}
 
 
+\begin{definition}[特殊ユニタリ群]
+    \(\mathrm{SU}(n, \mathbb{C}) := \{U \in \mathrm{SL}(n, \mathbb{C}) \mid U^* U = U U^* = I_n\}\) \par
+    特に, \(n = 2\) のとき, \(\mathrm{SU}(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ -\overline{b} & \overline{a} \end{pmatrix}
+    : a, b \in \mathbb{C} \mid |a|^2 + |b|^2 = 1\}\)
+
+    \begin{proof}
+        
+    \end{proof}
+\end{definition}
+
+
+\begin{theorem}
+    \(\mathrm{SL}(2, \mathbb{C})\) の任意の有限部分群は, \(\mathrm{SU}(2, \mathbb{C})\) のある有限部分群と共役である.
+
+    \begin{proof}
+        エルミート内積を不変に保つ
+    \end{proof}
+\end{theorem}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \begin{lemma}
-    \(\zeta_n = e^{2\pi i/n} (n \in \mathbb{N})\) とし, 行列 \(M = \begin{pmatrix} \zeta_n & 0 \\ 0 & \zeta_n^{-1} \end{pmatrix} \in \mathrm{SL}(2, \mathbb{C})\)
+    \(\epsilon_n = e^{2\pi i/n} (n \in \mathbb{N})\) とし, 行列 \(M = \begin{pmatrix} \epsilon_n & 0 \\ 0 & \epsilon_n^{-1} \end{pmatrix} \in \mathrm{SL}(2, \mathbb{C})\)
     で生成される部分群を \(G := \langle M \rangle\) とおく.
     このとき, \(G\) は位数 \(n\) の巡回群であり, 特に \(\mathrm{SL}(2, \mathbb{C})\) の有限部分群である.
 
@@ -60,7 +115,7 @@
         したがって, \(G\) は \(\mathrm{SL}(2, \mathbb{C})\) の部分群である.)
 
         次に, \(G\) の位数を求める.
-        \(\zeta_n\) の原始根の定義から, \(\zeta_n^n = 1\) かつ \(\zeta_n^k \neq 1 (0 < k < n)\) より,
+        \(\epsilon_n\) の原始根の定義から, \(\epsilon_n^n = 1\) かつ \(\epsilon_n^k \neq 1 (0 < k < n)\) より,
         \(M^n = I_2\) かつ, 任意の \(k \in \{1, 2, \dots, n-1\}\) に対して, \(M^k \neq I_2\) であるため,
         生成元 \(M\) の位数は \(\mathrm{ord}(M) = n\) であり, \(G\) の要素数は \(|G| = n\) となる.
         以上より, \(G\) は \(\mathrm{SL}(2, \mathbb{C})\) の位数 \(n\) の有限巡回部分群である.
@@ -69,19 +124,17 @@
 
 
 \begin{definition}[バイナリー二面体群]
-    \(n \in \mathbb{N}\), \(A = \begin{pmatrix} e^{\pi i/n} & 0 \\ 0 & e^{-\pi i/n} \end{pmatrix}\),
+    \(n \in \mathbb{N}\), \(A = \begin{pmatrix} \epsilon_{2n} & 0 \\ 0 & \epsilon_{2n} \end{pmatrix}\),
     \(B = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\) とする.
     このとき, \(BD_{4n} := \langle A, B \rangle = \{A^k, A^k B \mid k \in \mathbb{Z}\}\)
-    をバイナリー二面体群(binary dihedral group)と呼ぶ. (\(B^2 = A^n = -I_2\) であることに注意)
+    をバイナリー二面体群(binary dihedral group)と呼ぶ.
 \end{definition}
 
 
 \begin{lemma}
     バイナリー二面体群 \(BD_{4n}\) は位数 \(4n\) の \(\mathrm{SL}(2, \mathbb{C})\) の有限部分群である.
     \begin{proof}
-        \(BD_{4n}\) は \(\mathrm{SL}(2, \mathbb{C})\) の部分集合 \(\{A, B\}\) によって生成されるため部分群である.
-        
-        (以下はコード参考 :
+        以下はコード参考 :
         まず, \(BD_{4n}\) が \(\mathrm{SL}(2, \mathbb{C})\) の部分群であることを示す. \\
         \(k = 0\) とすると, \(A^0 = I_2 \in BD_{4n}\) より, 単位元を含む. \\
         任意の \(a, b \in \mathbb{Z}\) に対し, \(B A^a = A^{-a} B\) や \(B^2 = A^n\) から,
@@ -92,7 +145,7 @@
         任意の \(k \in \mathbb{Z}\) に対し, \(B^{-1} A^{-k} = A^k B^{-1}\) や \(B^{-1} = A^{-n} B\) から,
         \((A^k)^{-1} = A^{-k} \in BD_{4n}\),
         \((A^k B)^{-1} = B^{-1} A^{-k} = A^k B^{-1} = A^k A^{-n} B = A^{k-n} B \in BD_{4n}\) より, 逆元について閉じている.
-        したがって, \(BD_{4n}\) は \(\mathrm{SL}(2, \mathbb{C})\) の部分群である.)
+        したがって, \(BD_{4n}\) は \(\mathrm{SL}(2, \mathbb{C})\) の部分群である.
 
         次に, \(BD_{4n}\) の位数を求める.
         \(BD_{4n} = \{A^k, A^k B \mid k \in \mathbb{Z}\}\) であり, \(A^{2n} = I_2\) かつ \(B^2 = A^n\) であることから,
@@ -120,9 +173,9 @@
 
 
 \begin{definition}[バイナリー八面体群]
-    \(A = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\),
-    \(B = \frac{1}{2} \begin{pmatrix} 1 + i & 1 + i \\ -1 + i & 1 - i \end{pmatrix}\),
-    \(C = \frac{1}{\sqrt{2}} \begin{pmatrix} 1 + i & 0 \\ 0 & 1 - i \end{pmatrix}\) とする.
+    \(A = \frac{1}{\sqrt{2}} \begin{pmatrix} 1 + i & 0 \\ 0 & 1 - i \end{pmatrix}\),
+    \(B = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\),
+    \(C = \frac{1}{2} \begin{pmatrix} 1 + i & 1 + i \\ -1 + i & 1 - i \end{pmatrix}\) とする.
     このとき, \(BO_{48} := \langle A, B, C \rangle\) をバイナリー八面体群(binary octahedral group)と呼ぶ.
     なお, \(BO_{48}\) は, プラトン立体の一つである正八面体に対応する群である.
 \end{definition}
@@ -138,10 +191,9 @@
 
 
 \begin{definition}[バイナリー二十面体群]
-    \(A = \begin{pmatrix} i & 0 \\ 0 & -i \end{pmatrix}\),
+    \(A = \begin{pmatrix} \epsilon_5^3 & 0 \\ 0 & \epsilon_5^2 \end{pmatrix}\),
     \(B = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\),
-    \(C = \frac{1}{2} \begin{pmatrix} 1 + i & 1 + i \\ -1 + i & 1 - i \end{pmatrix}\),
-    \(D = \frac{1 + \sqrt{5}}{2} \begin{pmatrix} e^{\pi i/5} + e^{9\pi i/5} & e^{3\pi i/5} + e^{7\pi i/5} \\ -e^{3\pi i/5} + e^{7\pi i/5} & e^{\pi i/5} - e^{9\pi i/5} \end{pmatrix}\) とする.
+    \(C = \frac{1}{\sqrt{5}} \begin{pmatrix} -\epsilon_5 + \epsilon_5^4 & \epsilon_5^2 - \epsilon_5^3 \\ \epsilon_5^2 - \epsilon_5^3 & \epsilon - \epsilon_5^4 \end{pmatrix}\) とする.
     このとき, \(BI_{120} := \langle A, B, C, D \rangle\) をバイナリー二十面体群(binary icosahedral group)と呼ぶ.
     なお, \(BI_{120}\) は, プラトン立体の一つである正二十面体に対応する群である.
 \end{definition}
@@ -153,27 +205,6 @@
     
     \end{proof}
 \end{lemma}
-
-
-
-\begin{definition}[特殊ユニタリ群]
-    \(\mathrm{SU}(n, \mathbb{C}) := \{U \in \mathrm{SL}(n, \mathbb{C}) \mid U^* U = U U^* = I_n\}\) \par
-    特に, \(n = 2\) のとき, \(\mathrm{SU}(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ -\overline{b} & \overline{a} \end{pmatrix}
-    : a, b \in \mathbb{C} \mid |a|^2 + |b|^2 = 1\}\)
-
-    \begin{proof}
-        
-    \end{proof}
-\end{definition}
-
-
-\begin{theorem}
-    \(\mathrm{SL}(2, \mathbb{C})\) の任意の有限部分群は, \(\mathrm{SU}(2, \mathbb{C})\) のある有限部分群と共役である.
-
-    \begin{proof}
-        エルミート内積を不変に保つ
-    \end{proof}
-\end{theorem}
 
 
 

@@ -63,12 +63,12 @@ variable (n : ℕ) (hn : n ≠ 0)
 
 -- [位数nの巡回群] --
 
-def ζ : ℂ := exp (2 * (Real.pi : ℂ) * I / n)  -- ζ = e^(2πi/n)
+def ε (n : ℕ) : ℂ := exp (2 * (Real.pi : ℂ) * I / n)  -- ε = e^(2πi/n)
 
 -- 1. 生成元 M : 回転に対応する行列
 def M : SL(2, ℂ) :=
-  let N : Matrix (Fin 2) (Fin 2) ℂ := diagonal ![(ζ n), (ζ n)⁻¹]  -- !![ζ n, 0; 0, (ζ n)⁻¹]
-  ⟨N, by simp [N, ζ]⟩
+  let N : Matrix (Fin 2) (Fin 2) ℂ := diagonal ![(ε n), (ε n)⁻¹]  -- !![ε n, 0; 0, (ε n)⁻¹]
+  ⟨N, by simp [N, ε]⟩
 
 -- A n のべき乗全体の集合（Set）を定義
 def cyclicSet : Set (SL(2, ℂ)) := {g | ∃ k : ℤ, g = M n ^ k}
@@ -93,10 +93,10 @@ def cyclic_subgroup : Subgroup SL(2, ℂ) where
 def cyclicSubgroup : Subgroup SL(2, ℂ) := Subgroup.zpowers (M n)
   -- M n を生成元とする巡回群, Subgroup.closure {M n}
 
--- ζ n ^ k ≠ 1 for 0 < k < n
-lemma pow_ne_one (k : ℕ) (hk : 0 < k ∧ k < n) (hlt : 1 < n) : ζ n ^ k ≠ 1 := by
-  have hprim : IsPrimitiveRoot (ζ n) n := by
-    refine (isPrimitiveRoot_iff (ζ n) n ?_).mpr ?_
+-- ε n ^ k ≠ 1 for 0 < k < n
+lemma pow_ne_one (k : ℕ) (hk : 0 < k ∧ k < n) (hlt : 1 < n) : ε n ^ k ≠ 1 := by
+  have hprim : IsPrimitiveRoot (ε n) n := by
+    refine (isPrimitiveRoot_iff (ε n) n ?_).mpr ?_
     · exact Nat.ne_zero_of_lt hlt
     · use 1
       constructor
@@ -132,17 +132,17 @@ theorem finite_cyclic_subgroup_exists (hn : n ≠ 0) :
       · rw [M]
         ext i j
         simp [diagonal_pow]
-        fin_cases i <;> fin_cases j <;> simp [ζ, ← exp_nsmul, ← mul_div_assoc]
+        fin_cases i <;> fin_cases j <;> simp [ε, ← exp_nsmul, ← mul_div_assoc]
         <;> rw [mul_comm, mul_div_assoc, div_self, mul_one, exp_two_pi_mul_I]
         <;> exact Nat.cast_ne_zero.mpr hn
       · intro k hk kpos heq
         rw [M] at heq
-        have h : ζ n ^ k = 1 := by
+        have h : ε n ^ k = 1 := by
           apply_fun (fun M : SL(2, ℂ) => (M : Matrix (Fin 2) (Fin 2) ℂ) 0 0) at heq
           simp [one_apply_eq, diagonal_pow] at heq
           exact heq
         absurd h
-        rw [ζ]
+        rw [ε]
         apply pow_ne_one
         use kpos
         contrapose! h
@@ -154,12 +154,10 @@ theorem finite_cyclic_subgroup_exists (hn : n ≠ 0) :
 
 -- [BinaryDihedralGroup₄ₙ] --
 
-def ω : ℂ := exp ((Real.pi : ℂ) * I / n)  -- ω = e^(πi/n)
-
 -- 1. 生成元 A : 回転に対応する行列
 def A : SL(2, ℂ) :=
-  let M : Matrix (Fin 2) (Fin 2) ℂ := diagonal ![ω n, (ω n)⁻¹]  -- !![ω n, 0; 0, (ω n)⁻¹]
-  ⟨M, by simp [M, ω]⟩
+  let M : Matrix (Fin 2) (Fin 2) ℂ := diagonal ![ε (2*n), (ε (2*n))⁻¹]  -- !![ε 2n, 0; 0, (ε 2n)⁻¹]
+  ⟨M, by simp [M, ε]⟩
 
 -- 2. 生成元 j : 四元数の j に相当する行列
 def j : SL(2, ℂ) :=
@@ -194,9 +192,11 @@ lemma h₂ (hn : n ≠ 0) : j * j = A n ^ n := by
   ext i j
   simp only [SpecialLinearGroup.coe_pow]
   rw [diagonal_pow]
-  fin_cases i <;> fin_cases j <;> simp [ω, ← exp_nsmul, ← mul_div_assoc] <;>
-  rw [mul_comm, mul_div_assoc, div_self (by simp [hn]), mul_one, exp_pi_mul_I]
-  rw [inv_neg, inv_one]
+  fin_cases i <;> fin_cases j <;> simp [ε, ← exp_nsmul, ← mul_div_assoc] <;>
+  rw [← mul_assoc, ← mul_assoc, mul_comm 2, mul_assoc, mul_comm] <;>
+  rw [mul_div_assoc, div_self (by simp [hn]), mul_one, exp_pi_mul_I]
+  rw [inv_neg_one]
+
 
 lemma h₃ (k : ℤ) : j⁻¹ * A n ^ (-k) = A n ^ k * j⁻¹ := by
   have h := h₁ n k
@@ -211,12 +211,13 @@ lemma h₄ (hn : n ≠ 0) : j⁻¹ = (A n ^ n)⁻¹ * j := by
   nth_rw 2 [h]
   rw [← mul_assoc, inv_mul_cancel, one_mul]
 
+-- なぜその形で任意の元が表されるのかは言えてない
 -- バイナリー二面体群の定義
 def binary_dihedral_set : Set (SL(2, ℂ)) :=
   {M | ∃ k : ℤ, M = (A n) ^ k ∨ M = ((A n) ^ k) * j}  -- Subgroup.closure {A n, j} : A n と j によって生成される最小の部分群
 
 -- binary_dihedral_set n が SL(2, ℂ) の部分群であること
-def binary_dihedral_subgrup : Subgroup SL(2, ℂ) where
+def binary_dihedral_subgroup : Subgroup SL(2, ℂ) where
   carrier := binary_dihedral_set n
 
   one_mem' := by
@@ -247,13 +248,38 @@ def binary_dihedral_subgrup : Subgroup SL(2, ℂ) where
       rw [hMB, _root_.mul_inv_rev, ← zpow_neg, h₃, h₄ n hn, ← mul_assoc, mul_left_inj]
       rw [zpow_sub, zpow_natCast]
 
+-- `位数が4nであることも言えてない`
+
+
+def binary_dihedral_set' : Set (SL(2, ℂ)) := Subgroup.closure {A n, j}
+
+-- binary_dihedral_set n が SL(2, ℂ) の部分群であること
+def binary_dihedral_subgroup' : Subgroup SL(2, ℂ) where
+  carrier := binary_dihedral_set' n
+
+  one_mem' := by
+    rw [binary_dihedral_set']
+    exact one_mem (Subgroup.closure {A n, j})
+
+  mul_mem' := by
+    rw [binary_dihedral_set']
+    intro a b ha hb
+    exact mul_mem ha hb
+
+  inv_mem' := by
+    rw [binary_dihedral_set']
+    intro a ha
+    exact inv_mem ha
+
+
+-- `Set として定義して部分群であることを示すべき`
 
 -- [BinaryTetrahedralGroup₂₄] --
 
 def i : SL(2, ℂ) := ⟨!![I, 0; 0, -I], by simp⟩  -- 四元数のi
 
 def B : SL(2, ℂ) :=
-  let M : Matrix (Fin 2) (Fin 2) ℂ := !![(1/2)*(1+I), (1/2)*(1+I); (1/2)*(-1+I), (1/2)*(1-I)]
+  let M : Matrix (Fin 2) (Fin 2) ℂ := ((1 : ℂ) / 2) • !![(1+I), (1+I); (-1+I), (1-I)]
   ⟨M, by simp [M, det_fin_two]; ring_nf; rw [I_sq]; norm_num⟩
 
 /-- BT24 を SL(2, ℂ) の部分群として定義する -/
@@ -273,11 +299,31 @@ def BT24_subgroup : Subgroup SL(2, ℂ) where
     exact BT24.inv_mem hx
 
 
+def BT24' : Set SL(2, ℂ) := Subgroup.closure {i, j, B}
+
+def BT24_subgroup' : Subgroup SL(2, ℂ) where
+  carrier := {M | M ∈ BT24'}
+
+  one_mem' := by
+    rw [BT24']
+    exact one_mem (Subgroup.closure {i, j, B})
+
+  mul_mem' := by
+    rw [BT24']
+    intro a b ha hb
+    sorry
+
+  inv_mem' := by
+    rw [BT24']
+    intro x hx
+    sorry
+
+
 -- [BinaryOctahedralGroup₄₈] --
 
 -- 八面体群特有の生成元 (1+i)/√2 に相当する行列
 def C : SL(2, ℂ) :=
-  let M : Matrix (Fin 2) (Fin 2) ℂ := !![(1/(Real.sqrt 2))*(1 + I), 0; 0, (1/(Real.sqrt 2))*(1 - I)]
+  let M : Matrix (Fin 2) (Fin 2) ℂ := ((1 : ℂ) / (Real.sqrt 2 : ℂ)) • !![(1 + I), 0; 0, (1 - I)]
   ⟨M, by simp [M]; ring_nf; rw [I_sq]; norm_num; rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num⟩
 
 
@@ -299,16 +345,59 @@ def BO48_subgroup : Subgroup SL(2, ℂ) where
 
 -- [BinaryIcosahedralGroup₁₂₀] --
 def D : SL(2, ℂ) :=
-  let phi : ℂ := (1 + Real.sqrt 5) / 2
-  let inv2 : ℂ := (1 : ℂ) / 2
-  let M : Matrix (Fin 2) (Fin 2) ℂ := inv2 • !![phi + I * (phi - 1), 1; -1, phi - I * (phi - 1)]
-  ⟨M, by simp [M, phi, inv2]; ring_nf; rw [I_sq]; norm_num; rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num⟩
+  let M : Matrix (Fin 2) (Fin 2) ℂ :=  !![(ε 5)^3, 0; 0, (ε 5)^2]
+  ⟨M, by
+    simp [M, ε]; ring_nf
+    rw [← exp_nsmul, nsmul_eq_mul, Nat.cast_ofNat, mul_comm, mul_assoc]
+    simp
+    rw [mul_comm, ← mul_assoc, exp_two_pi_mul_I]⟩
 
 def E : SL(2, ℂ) :=
-  ⟨!![exp (Real.pi * I / 5), 0; 0, exp (- Real.pi * I / 5)], by simp [← exp_add]⟩
+  let M : Matrix (Fin 2) (Fin 2) ℂ :=
+    ((1 : ℂ) / (Real.sqrt 5)) • !![-(ε 5) + (ε 5)^4, (ε 5)^2 - (ε 5)^3; (ε 5)^2 - (ε 5)^3, (ε 5) - (ε 5)^4]
+  ⟨M, by
+    have hε : (ε 5)^5 = 1 := by
+      simp [ε, ← Complex.exp_nat_mul]
+      rw [mul_comm]
+      simp
+    have h : (√5 : ℂ) ^ 2 = 5 := by
+      rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]
+      rw [ofReal_ofNat]
+    simp [M]
+    ring_nf; field_simp; rw [h]
+    rw [show ε 5 ^ 6 = ε 5 by
+      calc
+        ε 5 ^ 6 = ε 5 ^ 5 * ε 5 := by ring
+        _ = 1 * ε 5 := by rw [hε]
+        _ = ε 5 := by ring]
+    have eps5_cyclotomic :
+        1 + ε 5 + (ε 5)^2 + (ε 5)^3 + (ε 5)^4 = 0 := by
+      have hpow : (ε 5)^5 = 1 := hε
+      have hne : ε 5 ≠ 1 := by
+        rw [ε, ne_eq]
+        intro neq
+        have heq : 5 ∣ 1 := by
+          rw [← Complex.exp_two_pi_mul_I_mul_div_eq_one_iff (by norm_num)]
+          rw [← neq, Nat.cast_one, mul_one, Nat.cast_ofNat]
+        norm_num at heq
+      have hfactor :
+       ((ε 5) - 1) * (1 + ε 5 + (ε 5)^2 + (ε 5)^3 + (ε 5)^4) = 0 :=
+      calc
+        _ = (ε 5)^5 - 1 := by ring
+        _ = 0 := by rw [hpow]; ring
+      rcases mul_eq_zero.mp hfactor with h | h
+      · exact False.elim (hne (sub_eq_zero.mp h))
+      · exact h
+    calc
+      _ = ε 5 ^ 2 * (5 * ε 5 ^ 3 -(1 + ε 5 + (ε 5)^2 + (ε 5)^3 + (ε 5)^4)) := by ring
+      _ = ε 5 ^ 2 * (5 * ε 5 ^ 3 - 0) := by rw [eps5_cyclotomic]
+      _ = ε 5 ^ 2 * (5 * ε 5 ^ 3) := by rw [sub_zero]
+      _ = 5 * (ε 5 ^ 2 * ε 5 ^ 3) := by ring
+      _ = 5 * ε 5 ^ 5 := by ring
+      _ = 5 := by rw [hε, mul_one]⟩
 
 /-- BI120 を生成元からなる部分群として定義 -/
-def BI120 : Subgroup SL(2, ℂ) := Subgroup.closure {i, j, D}
+def BI120 : Subgroup SL(2, ℂ) := Subgroup.closure {j, D, E}
 
 def BI120_subgroup : Subgroup SL(2, ℂ) where
   carrier := {M | M ∈ BI120}
