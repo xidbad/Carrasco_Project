@@ -125,7 +125,7 @@ lemma pow_ne_one (k : ℕ) (hk : 0 < k ∧ k < n) (hlt : 1 < n) : ε n ^ k ≠ 1
 -- 3. この部分群が位数 n の巡回群であることを示す
 theorem finite_cyclic_subgroup_exists (hn : n ≠ 0) :
     ∃ (G : Subgroup SL(2, ℂ)), IsCyclic G ∧ Nat.card G = n := by
-  use cyclic_subgroup n
+  use cyclicSubgroup n
   constructor
   · exact Subgroup.isCyclic_zpowers (M n)        -- zpowers で生成されているので定義から巡回群
   · rw [cyclicSubgroup, Nat.card_zpowers (M n)]  -- M n のみで生成される → 位数が元の位数と等しい
@@ -213,6 +213,7 @@ lemma h₄ (hn : n ≠ 0) : j⁻¹ = (A n ^ n)⁻¹ * j := by
   nth_rw 2 [h]
   rw [← mul_assoc, inv_mul_cancel, one_mul]
 
+
 -- なぜその形で任意の元が表されるのかは言えてない
 -- バイナリー二面体群の定義
 def binary_dihedral_set : Set (SL(2, ℂ)) :=
@@ -252,10 +253,10 @@ def binary_dihedral_subgroup : Subgroup SL(2, ℂ) where
 
 -- `位数が4nであることも言えてない`
 
-
+-- Set (SL(2, ℂ)) を closure として定義
 def binary_dihedral_set' : Set (SL(2, ℂ)) := Subgroup.closure {A n, j}
 
--- binary_dihedral_set n が SL(2, ℂ) の部分群であること
+-- binary_dihedral_set' n が SL(2, ℂ) の部分群であること
 def binary_dihedral_subgroup' : Subgroup SL(2, ℂ) where
   carrier := binary_dihedral_set' n
 
@@ -272,6 +273,17 @@ def binary_dihedral_subgroup' : Subgroup SL(2, ℂ) where
     rw [binary_dihedral_set']
     intro a ha
     exact inv_mem ha
+
+
+theorem binary_dihedral_mem :
+    binary_dihedral_set' n = {M | ∃ k : ℤ, M = (A n) ^ k ∨ M = ((A n) ^ k) * j} := by
+  sorry
+
+
+theorem binary_dihedral_order :
+    Fintype.card (binary_dihedral_set' n) = 4 * n := by
+  sorry
+
 
 
 -- `Set として定義して部分群であることを示すべき`
@@ -313,7 +325,8 @@ def BT24_subgroup' : Subgroup SL(2, ℂ) where
   mul_mem' := by
     rw [BT24']
     intro a b ha hb
-    sorry
+    apply mul_mem ha hb
+
 
   inv_mem' := by
     rw [BT24']
@@ -445,6 +458,7 @@ def SU2_subgroup : Subgroup SL(2, ℂ) where
       exact this
     · exact A⁻¹.prop
 
+
 -- -- もう一つの部分群の定義を使う
 def SU2_subgroup' : Subgroup SL(2, ℂ) := by
   refine Subgroup.ofDiv {M : SL(2, ℂ) | M.val ∈ SU 2} ?_ ?_
@@ -467,6 +481,15 @@ def SU2_subgroup' : Subgroup SL(2, ℂ) := by
         exact this
       · exact B⁻¹.prop
     exact mul_mem HA hB_inv
+
+
+theorem remark9 (M : SU 2) :
+    ∃ a b : ℂ, M.val = !![a, b; -(star b), star a] ∧ ‖a‖^2 + ‖b‖^2 = 1 := by
+  sorry
+
+
+
+
 
 
 end

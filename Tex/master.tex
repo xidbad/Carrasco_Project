@@ -50,7 +50,16 @@
     : a, b \in \mathbb{C} \mid |a|^2 + |b|^2 = 1\}\)
 
     \begin{proof}
-        
+        \(U = \begin{pmatrix} a & b \\ c & d \end{pmatrix} \in \mathrm{SU}(2, \mathbb{C})\) とする.
+        det U = 1, \(U^* = U^{-1}\) であることから,
+        \[\begin{cases}
+            ad - bc = 1 \\
+            a\overline{a} - c\overline{c} = 1 \\
+            b\overline{b} + d\overline{d} = 1 \\
+            a\overline{b} + c\overline{d} = 0
+        \end{cases}\]
+        が成り立ち, これを解くと, \(c = -\overline{b}, d = \overline{a}\) がわかる.
+        また, det U = 1 であることから, \(a\overline{a} + b\overline{b} = |a|^2 + |b|^2 = 1\).
     \end{proof}
 \end{definition}
 
@@ -60,6 +69,9 @@
 
     \begin{proof}
         エルミート内積を不変に保つ
+
+        \(G \subset \mathrm{SL}(2, \mathbb{C})\) : 有限, \(\langle \cdot, \cdot \rangle : \mathbb{C}^2 \rightarrow \mathbb{C}\)
+        を \(\mathbb{C}\) 上のエルミート内積とし
     \end{proof}
 \end{theorem}
 
