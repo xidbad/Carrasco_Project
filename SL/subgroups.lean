@@ -279,7 +279,6 @@ theorem binary_dihedral_mem :
     binary_dihedral_set' n = {M | ∃ k : ℤ, M = (A n) ^ k ∨ M = ((A n) ^ k) * j} := by
   sorry
 
-
 theorem binary_dihedral_order :
     Fintype.card (binary_dihedral_set' n) = 4 * n := by
   sorry
@@ -485,7 +484,35 @@ def SU2_subgroup' : Subgroup SL(2, ℂ) := by
 
 theorem remark9 (M : SU 2) :
     ∃ a b : ℂ, M.val = !![a, b; -(star b), star a] ∧ ‖a‖^2 + ‖b‖^2 = 1 := by
-  sorry
+  obtain ⟨hU, hdet⟩ := Matrix.mem_specialUnitaryGroup_iff.mp M.2
+  have h1 : M.val * star M.val = 1 := Matrix.mem_unitaryGroup_iff.mp hU
+  have h2 : star M.val * M.val = 1 := Matrix.mem_unitaryGroup_iff'.mp hU
+  -- det = 1 かつユニタリなので adjugate = star
+  have hadj : M.val.adjugate = star M.val := by
+    have := Matrix.inv_eq_left_inv h2
+    rw [Matrix.inv_def, hdet, Ring.inverse_one, one_smul] at this
+    exact this
+  rw [Matrix.adjugate_fin_two] at hadj
+  have hc : M.val 1 0 = -star (M.val 0 1) := by
+    have := congr_fun (congr_fun hadj 1) 0
+    simp [Matrix.star_apply] at this
+    first | linear_combination (-1) * this
+  have hd : M.val 1 1 = star (M.val 0 0) := by
+    have := congr_fun (congr_fun hadj 0) 0
+    simp [Matrix.star_apply] at this
+    first | linear_combination this
+  refine ⟨M.val 0 0, M.val 0 1, ?_, ?_⟩
+  · ext i j
+    fin_cases i <;> fin_cases j <;> simp [hc, hd]
+  · have e := congr_fun (congr_fun h1 0) 0
+    simp [Matrix.mul_apply, Fin.sum_univ_two, Matrix.star_apply] at e
+    have : ((‖M.val 0 0‖^2 + ‖M.val 0 1‖^2 : ℝ) : ℂ) = 1 := by
+      rw [← Complex.normSq_eq_norm_sq, ← Complex.normSq_eq_norm_sq,
+        Complex.ofReal_add, ← Complex.mul_conj, ← Complex.mul_conj]
+      simpa [Complex.star_def] using e
+    exact_mod_cast this
+
+
 
 
 
