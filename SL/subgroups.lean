@@ -91,6 +91,24 @@ def cyclic_subgroup : Subgroup SL(2, ℂ) where
     use -k
     rw [hk, zpow_neg]
 
+def cyclic_subgroup' : Subgroup SL(2, ℂ) where
+  carrier := cyclicSet' n
+
+  one_mem' := by
+    rw [cyclicSet']
+    apply one_mem
+
+  mul_mem' := by
+    rw [cyclicSet']
+    intro a b ha hb
+    exact mul_mem ha hb
+
+  inv_mem' := by
+    rw [cyclicSet']
+    intro a ha
+    exact inv_mem ha
+
+
 -- 2. 巡回群から SL(2, ℂ) への群準同型
 def cyclicSubgroup : Subgroup SL(2, ℂ) := Subgroup.zpowers (M n)
   -- M n を生成元とする巡回群, Subgroup.closure {M n}
@@ -326,7 +344,6 @@ def BT24_subgroup' : Subgroup SL(2, ℂ) where
     intro a b ha hb
     apply mul_mem ha hb
 
-
   inv_mem' := by
     rw [BT24']
     intro x hx
@@ -356,6 +373,24 @@ def BO48_subgroup : Subgroup SL(2, ℂ) where
     intro x hx
     exact BO48.inv_mem hx
 
+def BO48' : Set SL(2, ℂ) := Subgroup.closure {j, B, C}
+
+def BO48_subgroup' : Subgroup SL(2, ℂ) where
+  carrier := {M | M ∈ BO48'}
+
+  one_mem' := by
+    rw [BO48']
+    exact one_mem (Subgroup.closure {j, B, C})
+
+  mul_mem' := by
+    rw [BO48']
+    intro a b ha hb
+    apply BO48'.mul_mem ha hb
+
+  inv_mem' := by
+    rw [BO48']
+    intro x hx
+    exact BO48'.inv_mem hx
 
 -- [BinaryIcosahedralGroup₁₂₀] --
 def D : SL(2, ℂ) :=
@@ -425,6 +460,26 @@ def BI120_subgroup : Subgroup SL(2, ℂ) where
   inv_mem' := by
     intro x hx
     exact BI120.inv_mem hx
+
+
+def BI120' : Set SL(2, ℂ) := Subgroup.closure {j, D, E}
+
+def BI120_subgroup' : Subgroup SL(2, ℂ) where
+  carrier := {M | M ∈ BI120'}
+
+  one_mem' := by
+    rw [BI120']
+    exact one_mem (Subgroup.closure {j, D, E})
+
+  mul_mem' := by
+    rw [BI120']
+    intro a b ha hb
+    exact BI120'.mul_mem ha hb
+
+  inv_mem' := by
+    rw [BI120']
+    intro x hx
+    exact BI120'.inv_mem hx
 
 
 -- [SU(2)の性質] --
@@ -511,12 +566,6 @@ theorem remark9 (M : SU 2) :
         Complex.ofReal_add, ← Complex.mul_conj, ← Complex.mul_conj]
       simpa [Complex.star_def] using e
     exact_mod_cast this
-
-
-
-
-
-
 
 
 end
