@@ -109,6 +109,13 @@ def cyclic_subgroup' : Subgroup SL(2, ℂ) where
     exact inv_mem ha
 
 
+lemma cyclic_eq_zpowers : cyclicSet' n = Subgroup.zpowers (M n) := by
+  simp only [cyclicSet', SetLike.coe_set_eq]
+  ext x
+  constructor <;> intro h <;> sorry
+
+
+
 -- 2. 巡回群から SL(2, ℂ) への群準同型
 def cyclicSubgroup : Subgroup SL(2, ℂ) := Subgroup.zpowers (M n)
   -- M n を生成元とする巡回群, Subgroup.closure {M n}
