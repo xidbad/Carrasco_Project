@@ -2,7 +2,7 @@ import SL.Common
 import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Analysis.InnerProductSpace.Defs
-import Mathlib.LinearAlgebra.SpecialLinearGroup
+import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
 
 
 open MatrixGroups Matrix Complex SpecialLinearGroup Quaternion
