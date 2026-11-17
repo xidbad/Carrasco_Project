@@ -70,47 +70,50 @@ def M : SL(2, ℂ) :=
   let N : Matrix (Fin 2) (Fin 2) ℂ := diagonal ![(ε n), (ε n)⁻¹]  -- !![ε n, 0; 0, (ε n)⁻¹]
   ⟨N, by simp [N, ε]⟩
 
--- A n のべき乗全体の集合（Set）を定義
-def cyclicSet : Set (SL(2, ℂ)) := {g | ∃ k : ℤ, g = M n ^ k}
 
-def cyclicSet' : Set (SL(2, ℂ)) := Subgroup.closure {M n}
+-- A n のべき乗全体の集合（Set）を定義
+def cyclicSet : Set (SL(2, ℂ)) := Subgroup.closure {M n}
 
 -- cyclicSet が SL(2, ℂ)の部分群であること
-def cyclic_subgroup : Subgroup SL(2, ℂ) where
+def cyclic_subgroup' : Subgroup SL(2, ℂ) where
   carrier := cyclicSet n
 
-  one_mem' := ⟨0, by simp only [zpow_zero]⟩  -- k = 0
-
-  mul_mem' := by               -- A n ^ k * A n ^ m = A n ^ (k + m)
-    intro a b ⟨k, hk⟩ ⟨m, hm⟩
-    use k + m
-    rw [hk, hm, zpow_add]
-
-  inv_mem' := by       -- (A n ^ k)⁻¹ = A n ^ (-k)
-    intro a ⟨k, hk⟩
-    use -k
-    rw [hk, zpow_neg]
-
-def cyclic_subgroup' : Subgroup SL(2, ℂ) where
-  carrier := cyclicSet' n
-
   one_mem' := by
-    rw [cyclicSet']
+    rw [cyclicSet]
     apply one_mem
 
   mul_mem' := by
-    rw [cyclicSet']
+    rw [cyclicSet]
     intro a b ha hb
     exact mul_mem ha hb
 
   inv_mem' := by
-    rw [cyclicSet']
+    rw [cyclicSet]
     intro a ha
     exact inv_mem ha
 
 
-lemma cyclic_eq_zpowers : cyclicSet' n = Subgroup.zpowers (M n) := by
-  simp only [cyclicSet', SetLike.coe_set_eq]
+-- -- 具体で定義
+-- def cyclicSet' : Set (SL(2, ℂ)) := {g | ∃ k : ℤ, g = M n ^ k}
+
+-- def cyclic_subgroup : Subgroup SL(2, ℂ) where
+--   carrier := cyclicSet' n
+
+--   one_mem' := ⟨0, by simp only [zpow_zero]⟩  -- k = 0
+
+--   mul_mem' := by               -- A n ^ k * A n ^ m = A n ^ (k + m)
+--     intro a b ⟨k, hk⟩ ⟨m, hm⟩
+--     use k + m
+--     rw [hk, hm, zpow_add]
+
+--   inv_mem' := by       -- (A n ^ k)⁻¹ = A n ^ (-k)
+--     intro a ⟨k, hk⟩
+--     use -k
+--     rw [hk, zpow_neg]
+
+
+lemma cyclic_eq_zpowers : cyclicSet n = Subgroup.zpowers (M n) := by
+  rw [cyclicSet, SetLike.coe_set_eq]
   ext x
   constructor <;> intro h <;> sorry
 
@@ -224,7 +227,6 @@ lemma h₂ (hn : n ≠ 0) : j * j = A n ^ n := by
   rw [mul_div_assoc, div_self (by simp [hn]), mul_one, exp_pi_mul_I]
   rw [inv_neg_one]
 
-
 lemma h₃ (k : ℤ) : j⁻¹ * A n ^ (-k) = A n ^ k * j⁻¹ := by
   have h := h₁ n k
   apply_fun (λ x => j⁻¹ * x * j⁻¹) at h
@@ -239,10 +241,34 @@ lemma h₄ (hn : n ≠ 0) : j⁻¹ = (A n ^ n)⁻¹ * j := by
   rw [← mul_assoc, inv_mul_cancel, one_mul]
 
 
--- なぜその形で任意の元が表されるのかは言えてない
 -- バイナリー二面体群の定義
+
+-- Set (SL(2, ℂ)) を closure として定義
+def BD₄ₙ : Set (SL(2, ℂ)) := Subgroup.closure {A n, j}
+
+-- BD₄ₙ n が SL(2, ℂ) の部分群であること
+def BD₄ₙ_subgroup : Subgroup SL(2, ℂ) where
+  carrier := BD₄ₙ n
+
+  one_mem' := by
+    rw [BD₄ₙ]
+    exact one_mem (Subgroup.closure {A n, j})
+
+  mul_mem' := by
+    rw [BD₄ₙ]
+    intro a b ha hb
+    exact mul_mem ha hb
+
+  inv_mem' := by
+    rw [BD₄ₙ]
+    intro a ha
+    exact inv_mem ha
+
+
+-- なぜその形で任意の元が表されるのかは言えてない
 def binary_dihedral_set : Set (SL(2, ℂ)) :=
   {M | ∃ k : ℤ, M = (A n) ^ k ∨ M = ((A n) ^ k) * j}  -- Subgroup.closure {A n, j} : A n と j によって生成される最小の部分群
+
 
 -- binary_dihedral_set n が SL(2, ℂ) の部分群であること
 def binary_dihedral_subgroup : Subgroup SL(2, ℂ) where
@@ -276,36 +302,15 @@ def binary_dihedral_subgroup : Subgroup SL(2, ℂ) where
       rw [hMB, _root_.mul_inv_rev, ← zpow_neg, h₃, h₄ n hn, ← mul_assoc, mul_left_inj]
       rw [zpow_sub, zpow_natCast]
 
+
 -- `位数が4nであることも言えてない`
 
--- Set (SL(2, ℂ)) を closure として定義
-def binary_dihedral_set' : Set (SL(2, ℂ)) := Subgroup.closure {A n, j}
-
--- binary_dihedral_set' n が SL(2, ℂ) の部分群であること
-def binary_dihedral_subgroup' : Subgroup SL(2, ℂ) where
-  carrier := binary_dihedral_set' n
-
-  one_mem' := by
-    rw [binary_dihedral_set']
-    exact one_mem (Subgroup.closure {A n, j})
-
-  mul_mem' := by
-    rw [binary_dihedral_set']
-    intro a b ha hb
-    exact mul_mem ha hb
-
-  inv_mem' := by
-    rw [binary_dihedral_set']
-    intro a ha
-    exact inv_mem ha
-
-
 theorem binary_dihedral_mem :
-    binary_dihedral_set' n = {M | ∃ k : ℤ, M = (A n) ^ k ∨ M = ((A n) ^ k) * j} := by
+    BD₄ₙ n = {M | ∃ k : ℤ, M = (A n) ^ k ∨ M = ((A n) ^ k) * j} := by
   sorry
 
 theorem binary_dihedral_order :
-    Fintype.card (binary_dihedral_set' n) = 4 * n := by
+    Fintype.card ((BD₄ₙ n).val) = 4 * n := by
   sorry
 
 
@@ -321,40 +326,26 @@ def B : SL(2, ℂ) :=
   ⟨M, by simp [M, det_fin_two]; ring_nf; rw [I_sq]; norm_num⟩
 
 /-- BT24 を SL(2, ℂ) の部分群として定義する -/
-def BT24 : Subgroup SL(2, ℂ) := Subgroup.closure {i, j, B}
+def BT₂₄ : Set SL(2, ℂ) := Subgroup.closure {i, j, B}
 
 def BT24_subgroup : Subgroup SL(2, ℂ) where
-  carrier := {M | M ∈ BT24}
-
-  one_mem' := BT24.one_mem
-
-  mul_mem' := by
-    intro a b ha hb
-    exact BT24.mul_mem ha hb
-
-  inv_mem' := by
-    intro x hx
-    exact BT24.inv_mem hx
-
-
-def BT24' : Set SL(2, ℂ) := Subgroup.closure {i, j, B}
-
-def BT24_subgroup' : Subgroup SL(2, ℂ) where
-  carrier := {M | M ∈ BT24'}
+  carrier := BT₂₄
 
   one_mem' := by
-    rw [BT24']
+    rw [BT₂₄]
     exact one_mem (Subgroup.closure {i, j, B})
 
   mul_mem' := by
-    rw [BT24']
+    rw [BT₂₄]
     intro a b ha hb
-    apply mul_mem ha hb
+    rw [SetLike.mem_coe] at *
+    exact mul_mem ha hb
 
   inv_mem' := by
-    rw [BT24']
+    rw [BT₂₄]
     intro x hx
-    sorry
+    rw [SetLike.mem_coe] at *
+    exact inv_mem hx
 
 
 -- [BinaryOctahedralGroup₄₈] --
@@ -365,39 +356,26 @@ def C : SL(2, ℂ) :=
   ⟨M, by simp [M]; ring_nf; rw [I_sq]; norm_num; rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num⟩
 
 
-def BO48 : Subgroup SL(2, ℂ) := Subgroup.closure {j, B, C}
+def BO48 : Set SL(2, ℂ) := Subgroup.closure {j, B, C}
 
 def BO48_subgroup : Subgroup SL(2, ℂ) where
   carrier := {M | M ∈ BO48}
 
-  one_mem' := BO48.one_mem
-
-  mul_mem' := by
-    intro a b ha hb
-    exact BO48.mul_mem ha hb
-
-  inv_mem' := by
-    intro x hx
-    exact BO48.inv_mem hx
-
-def BO48' : Set SL(2, ℂ) := Subgroup.closure {j, B, C}
-
-def BO48_subgroup' : Subgroup SL(2, ℂ) where
-  carrier := {M | M ∈ BO48'}
-
   one_mem' := by
-    rw [BO48']
+    rw [BO48]
     exact one_mem (Subgroup.closure {j, B, C})
 
   mul_mem' := by
-    rw [BO48']
+    rw [BO48]
     intro a b ha hb
-    apply BO48'.mul_mem ha hb
+    simp only [SetLike.mem_coe, SetLike.setOf_mem_eq] at *
+    exact mul_mem ha hb
 
   inv_mem' := by
-    rw [BO48']
+    rw [BO48]
     intro x hx
-    exact BO48'.inv_mem hx
+    simp only [SetLike.mem_coe, SetLike.setOf_mem_eq] at *
+    exact inv_mem hx
 
 -- [BinaryIcosahedralGroup₁₂₀] --
 def D : SL(2, ℂ) :=
@@ -453,40 +431,26 @@ def E : SL(2, ℂ) :=
       _ = 5 := by rw [hε, mul_one]⟩
 
 /-- BI120 を生成元からなる部分群として定義 -/
-def BI120 : Subgroup SL(2, ℂ) := Subgroup.closure {j, D, E}
+def BI120 : Set SL(2, ℂ) := Subgroup.closure {j, D, E}
 
 def BI120_subgroup : Subgroup SL(2, ℂ) where
   carrier := {M | M ∈ BI120}
 
-  one_mem' := BI120.one_mem
-
-  mul_mem' := by
-    intro a b ha hb
-    exact BI120.mul_mem ha hb
-
-  inv_mem' := by
-    intro x hx
-    exact BI120.inv_mem hx
-
-
-def BI120' : Set SL(2, ℂ) := Subgroup.closure {j, D, E}
-
-def BI120_subgroup' : Subgroup SL(2, ℂ) where
-  carrier := {M | M ∈ BI120'}
-
   one_mem' := by
-    rw [BI120']
+    rw [BI120]
     exact one_mem (Subgroup.closure {j, D, E})
 
   mul_mem' := by
-    rw [BI120']
+    rw [BI120]
     intro a b ha hb
-    exact BI120'.mul_mem ha hb
+    simp only [SetLike.mem_coe, SetLike.setOf_mem_eq] at *
+    exact mul_mem ha hb
 
   inv_mem' := by
-    rw [BI120']
+    rw [BI120]
     intro x hx
-    exact BI120'.inv_mem hx
+    simp only [SetLike.mem_coe, SetLike.setOf_mem_eq] at *
+    exact inv_mem hx
 
 
 -- [SU(2)の性質] --
@@ -558,11 +522,11 @@ theorem remark9 (M : SU 2) :
   have hc : M.val 1 0 = -star (M.val 0 1) := by
     have := congr_fun (congr_fun hadj 1) 0
     simp [Matrix.star_apply] at this
-    first | linear_combination (-1) * this
+    linear_combination (-1) * this
   have hd : M.val 1 1 = star (M.val 0 0) := by
     have := congr_fun (congr_fun hadj 0) 0
     simp [Matrix.star_apply] at this
-    first | linear_combination this
+    linear_combination this
   refine ⟨M.val 0 0, M.val 0 1, ?_, ?_⟩
   · ext i j
     fin_cases i <;> fin_cases j <;> simp [hc, hd]
@@ -571,7 +535,7 @@ theorem remark9 (M : SU 2) :
     have : ((‖M.val 0 0‖^2 + ‖M.val 0 1‖^2 : ℝ) : ℂ) = 1 := by
       rw [← Complex.normSq_eq_norm_sq, ← Complex.normSq_eq_norm_sq,
         Complex.ofReal_add, ← Complex.mul_conj, ← Complex.mul_conj]
-      simpa [Complex.star_def] using e
+      simp only [Fin.isValue, e]
     exact_mod_cast this
 
 

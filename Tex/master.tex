@@ -31,7 +31,7 @@
 
 \begin{definition}[特殊線形群]
     \(\mathrm{SL}(n, \mathbb{C}) := \{ A \in M_n(\mathbb{C}) \mid \det(A) = 1 \}\) \par
-    特に, \(n = 2\) のとき, \(\mathrm{SL}(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ c & d \end{pmatrix} : a, b, c, d, \in \mathbb{C} \mid det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc = 1\}\)
+    特に, \(n = 2\) のとき, \(\mathrm{SL}(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ c & d \end{pmatrix} : a, b, c, d, \in \mathbb{C} \mid \det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc = 1\}\)
 \end{definition}
 
 % \begin{theorem}[\(\mathrm{SL}(2, \mathbb{C})\) の部分群]
@@ -45,21 +45,21 @@
 
 
 \begin{definition}[特殊ユニタリ群]
-    \(\mathrm{SU}(n, \mathbb{C}) := \{U \in \mathrm{SL}(n, \mathbb{C}) \mid U^* U = U U^* = I_n\}\) \par
+    \(\mathrm{SU}(n, \mathbb{C}) := \{U \in \mathrm{SL}(n, \mathbb{C}) \mid U^ U = U U^ = I_n\}\) \par
     特に, \(n = 2\) のとき, \(\mathrm{SU}(2, \mathbb{C}) = \{\begin{pmatrix} a & b \\ -\overline{b} & \overline{a} \end{pmatrix}
     : a, b \in \mathbb{C} \mid |a|^2 + |b|^2 = 1\}\)
 
     \begin{proof}
         \(U = \begin{pmatrix} a & b \\ c & d \end{pmatrix} \in \mathrm{SU}(2, \mathbb{C})\) とする.
-        det U = 1, \(U^* = U^{-1}\) であることから,
-        \[\begin{cases}
-            ad - bc = 1 \\
-            a\overline{a} - c\overline{c} = 1 \\
-            b\overline{b} + d\overline{d} = 1 \\
-            a\overline{b} + c\overline{d} = 0
-        \end{cases}\]
+        \(\det U = 1\), \(U^* = U^{-1}\) であることから,
+        \(U^* = \frac{1}{\det U}(\mathrm{adj}U) = \mathrm{adj}U\)
+
+        つまり, \(\begin{pmatrix} \overline{a} & \overline{c} \\ \overline{b} & \overline{d} \end{pmatrix}
+        = \begin{pmatrix} d & -b \\ -c & a \end{pmatrix}\)
         が成り立ち, これを解くと, \(c = -\overline{b}, d = \overline{a}\) がわかる.
-        また, det U = 1 であることから, \(a\overline{a} + b\overline{b} = |a|^2 + |b|^2 = 1\).
+
+        また, \(UU^*_{1 1} = a\overline{a} + b\overline{b} = 1\) であることから, 
+        \(|a|^2 + |b|^2 = 1\).
     \end{proof}
 \end{definition}
 
@@ -68,10 +68,8 @@
     \(\mathrm{SL}(2, \mathbb{C})\) の任意の有限部分群は, \(\mathrm{SU}(2, \mathbb{C})\) のある有限部分群と共役である.
 
     \begin{proof}
-        エルミート内積を不変に保つ
-
         有限部分群 \(G \subset \mathrm{SL}(2, \mathbb{C})\) をとり, 
-        \(\mathbb{C}^2\) 上のエルミート内積 \(\langle \cdot, \cdot \rangle : \mathbb{C}^2 \rightarrow \mathbb{C}\)
+        \(\mathbb{C}^2\) 上のエルミート内積 \(\langle \cdot, \cdot \rangle : \mathbb{C}^2 \times \mathbb{C}^2 \rightarrow \mathbb{C}\)
         を以下のように定める :
         \[\langle u,v\rangle_G := \frac{1}{|G|} \sum_{g\in G}\langle gu,gv\rangle
         \quad u,v\in\mathbb{C}^2 \]
@@ -82,12 +80,12 @@
         \[\begin{aligned} \langle u+v, w \rangle_G &= \frac{1}{|G|}\sum_{g\in G} \langle g(u+v), gw \rangle
         = \frac{1}{|G|}\sum_{g\in G} \langle gu + gv, gw \rangle \\
         &= \frac{1}{|G|}\sum_{g\in G} (\langle gu, gw \rangle + \langle gv, gw \rangle)
-        = \langle u, w \rangle_G + \langle v, w \rangle_G \end{aligned} \text{(左線型性)}\]
+        = \langle u, w \rangle_G + \langle v, w \rangle_G \end{aligned} \text{(左加法性)}\]
 
         次に, 任意の \(u, v \in \mathbb{C}^2, c \in \mathbb{C}\) に対して,
         \[\langle cu, v \rangle_G = \frac{1}{|G|}\sum_{g\in G} \langle gcu, gw \rangle
-            = \frac{1}{|G|}\sum_{g\in G} c\langle gu, gw \rangle
-            = c \langle u,v\rangle_G \text{(スカラー倍)}\]
+            = \frac{1}{|G|}\sum_{g\in G} \overline{c} \langle gu, gw \rangle
+            = \overline{c} \langle u,v\rangle_G \text{(スカラー倍)}\]
 
         さらに, 任意の \(u, v \in \mathbb{C}^2\) に対して,
         \[\overline{\langle u, v \rangle_G} = \overline{\frac{1}{|G|}\sum_{g\in G} \langle gu, gv\rangle}
@@ -98,34 +96,38 @@
         また, 任意の \(u \in \mathbb{C}^2\) に対して,
         \[\langle u, u \rangle_G = \frac{1}{|G|}\sum_{g\in G} \langle gu, gu \rangle
             \ge \frac{1}{|G|}\sum_{g\in G} 0 = 0 \text{(非負性)}\]
-        等号成立は, 任意の \(g \in G\) で, \(gu = 0\). \(g = e_G\) とすれば, \(e_Gu = u = 0\) のとき.
+        等号成立は, 任意の \(g \in G\) で, \(\langle gu, gu \rangle = 0 \Leftrightarrow gu = 0\). \(g = e_G\) とすれば, \(e_Gu = u = 0\) のとき.
 
-        以上より, \(\langle u, v \rangle_G\) はエルミート内積である.
+
+        以上より, \(\langle \cdot, \cdot \rangle_G\) はエルミート内積である.
         
         また, 任意の \(h \in G\) に対して,
         \[\langle hu, hv \rangle_G = \frac{1}{|G|}\sum_{g \in G} \langle g(hu), g(hv) \rangle
         = \frac{1}{|G|}\sum_{gh \in G} \langle (gh)u, (gh)v \rangle
-        = \langle u, v \rangle_G \quad (\because ~ hg \in G) \text{(G-不変性)}\]
-        よって \(G\) の各元は, 内積 \(\langle \cdot, \cdot \rangle_G\) に関してユニタリである.
-        
-        このことからある \(g \in G\) の行または列をとると, それは \(\langle \cdot, \cdot \rangle_G\)
-        の正規直交基底となる.
-        (\(\because\) \(g \in G\) を適当にとり, \(g = (v_1, v_2) (v_1, v_2 \in \mathbb{C}^2)\) とする.
-        このとき, \(ge_1 = (v_1, v_2) (1, 0)^T = v_1, ge_2 = (v_1, v_2) (0, 1)^T = v_2\)
-        よって, \(\langle v_1, v_2 \rangle_G = \langle ge_1, ge_2 \rangle_G = \langle e_1, e_2 \rangle_G = 0\),
-        \(\langle v_1, v_1 \rangle_G = \langle ge_1, ge_1 \rangle_G = \langle e_1, e_1 \rangle_G = 1 \)(\(v_2\) も同様)
-        \(\therefore (v_1, v_2)\) が \(\langle \cdot, \cdot \rangle_G\) の正規直交基底.)
-        \(\langle \cdot, \cdot \rangle_G\) における正規直交基底を \((v_1, v_2)\) としたとき, 
-        \(Uv_1 = e_1, Uv_2 = e_2\) となるように(平均内積から標準内積へ変換する基底変換行列) \(U\) を取る.
-        
-        すると, 任意の \(g \in G\) と \(u, v \in \mathbb{C}^2\) に対して,
-        \[\langle Uu, Uv \rangle = \langle u, v \rangle_G
-        = \langle gu, gv \rangle_G
-        = \langle Ugu, Ugv \rangle
-        = \langle UgU^{-1}(Uu), UgU^{-1}(Uv) \rangle\]
+        = \langle u, v \rangle_G \quad (\because ~ gh \in G) \text{(\(G\)-不変性)}\]
 
-        よって, \(UgU^{-1} \in U(2)\) で, \(det(UgU^{-1}) = detU * det g * \frac{1}{detU}
-        = detg = 1 (\because g \in G \subset \mathrm{SL}(2, \mathbb{C}))\)
+        ここで \(\langle \cdot, \cdot \rangle_G\) における正規直交基底を \((v_1, v_2)\) としたとき, 
+        \(Uv_1 = e_1, Uv_2 = e_2\) となるように(平均内積から標準内積へ変換する基底変換行列) \(U\) を取る.
+        \(UgU^{-1}\) がユニタリであること \(\Leftrightarrow (UgU^{-1})^* (UgU^{-1}) = 1\) を示す.
+        任意の \(g \in G\) と \(u, v \in \mathbb{C}^2\) に対して,
+        \[\langle Ugu, Ugv \rangle = \langle gu, gv \rangle_G
+        = \langle u, v \rangle_G = \langle Uu, Uv \rangle\]
+
+        \(x, y \in \mathbb{C}^2\) として,  \(u = U^{-1}x, v = U^{-1}y\) を代入すると,
+        \(\langle UgU^{-1}x, UgU^{-1}y \rangle = \langle x, y \rangle\)
+
+        \(\langle UgU^{-1}x, UgU^{-1}y \rangle = \overline{UgU^{-1}x} \cdot (UgU^{-1}y)
+        = \overline{x} \cdot (UgU^{-1})^* (UgU^{-1})y
+        = \langle x, (UgU^{-1})^* (UgU^{-1}) y \rangle\)
+
+        ここで \(x = e_i, y = e_j ~ (i, j \in \{1, 2\})\) を代入すると,
+        \(\langle e_i, ((UgU^{-1})^*)(UgU^{-1})e_j \rangle = \langle e_i, e_j \rangle\)
+
+        つまり \(\overline{e_i} \cdot ((UgU^{-1})^*)(UgU^{-1})e_j = ((UgU^{-1})^*(UgU^{-1}))_{ij} = 1_{ij}
+        \Leftrightarrow (UgU^{-1})^* (UgU^{-1}) = 1\)
+
+        よって, \(UgU^{-1} \in U(2)\) で, \(\det(UgU^{-1}) = \det U \det g (\det U)^{-1}
+        = \det g = 1 (\because ~ g \in G \subset \mathrm{SL}(2, \mathbb{C}))\)
         
         以上より, \(UgU^{-1} \in \mathrm{SU}(2)\) で \(UGU^{-1} \subset \mathrm{SU}(2)\).
         したがって, \(G\) は \(\mathrm{SU}(2)\) の有限部分群と共役である.

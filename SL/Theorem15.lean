@@ -18,7 +18,7 @@ def toVec (x : ℍ[ℝ]) : Fin 3 → ℝ := ![x.imI, x.imJ, x.imK]
 @[simp] lemma toVec_zero (x : ℍ[ℝ]) : toVec x 0 = x.imI := rfl
 @[simp] lemma toVec_one (x : ℍ[ℝ]) : toVec x 1 = x.imJ := rfl
 @[simp] lemma toVec_two (x : ℍ[ℝ]) : toVec x 2 = x.imK := rfl
-x
+
 @[simp] lemma toVec_ofVec (v : Fin 3 → ℝ) : toVec (ofVec v) = v := by
   funext i; fin_cases i <;> rfl
 
